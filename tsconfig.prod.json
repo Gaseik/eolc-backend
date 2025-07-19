@@ -17,14 +17,14 @@
     "removeComments": true
   },
   "include": [
-    "src/**/*.ts",
-    "config.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "tests",
     "src/public/",
     "scripts",
     "eslint.config.ts",
-    "vitest.config.js"
+    "vitest.config.js",
+    "config.ts"
   ]
 }
