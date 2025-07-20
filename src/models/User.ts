@@ -1,32 +1,43 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import bcrypt from 'bcrypt';
+
+export type UserRole = 'admin' | 'manufacturer' | 'regulator' | 'endUser';
 
 export interface IUser extends Document {
+  email: string;
+  passwordHash: string;
+  role: UserRole;
+  organizationId?: mongoose.Types.ObjectId | string;
   firstName: string;
   lastName: string;
-  email: string;
-  password: string;
-  role: 'admin' | 'manager' | 'user';
-  comparePassword(password: string): Promise<boolean>;
+  phone?: string;
+  avatarUrl?: string;
+  twoFactorEnabled: boolean;
+  twoFactorSecret?: string;
+  backupCodes: string[];
+  emailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema = new Schema<IUser>({
+  email: { type: String, required: true, unique: true },
+  passwordHash: { type: String, required: true },
+  role: { type: String, enum: ['admin', 'manufacturer', 'regulator', 'endUser'], required: true },
+  organizationId: { type: Schema.Types.ObjectId, ref: 'Organization' },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'manager', 'user'], default: 'user' },
-}, { timestamps: true });
-
-// 密碼加密
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
+  phone: { type: String },
+  avatarUrl: { type: String },
+  twoFactorEnabled: { type: Boolean, default: false },
+  twoFactorSecret: { type: String },
+  backupCodes: { type: [String], default: [] },
+  emailVerified: { type: Boolean, default: false },
+  emailVerificationToken: { type: String },
+  emailVerificationExpires: { type: Date },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
-
-UserSchema.methods.comparePassword = async function (password: string) {
-  return bcrypt.compare(password, this.password);
-};
 
 export default mongoose.model<IUser>('User', UserSchema);

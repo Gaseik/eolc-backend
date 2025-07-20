@@ -32,6 +32,7 @@
     "module-alias": "^2.2.3",
     "mongoose": "^8.16.2",
     "morgan": "^1.10.0",
+    "nodemailer": "^7.0.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
