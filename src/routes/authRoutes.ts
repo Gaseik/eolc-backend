@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { signup, login, getProfile, emailVerification, logout, refreshToken, updateProfile, forgotPassword, resetPassword } from '../controllers/authController';
+import { getInviteInfo, activateInvite } from '../controllers/userController';
 import { authAndRefresh } from '../utils/jwt';
 
 const router = Router();
@@ -230,5 +231,55 @@ router.post('/forgot-password', forgotPassword);
  *         description: token 錯誤或過期
  */
 router.post('/reset-password', resetPassword);
+
+/**
+ * @swagger
+ * /auth/invite-info:
+ *   get:
+ *     summary: 取得邀請資訊（註冊頁用）
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 邀請 token
+ *     responses:
+ *       200:
+ *         description: 邀請資訊
+ *       400:
+ *         description: token 無效
+ */
+router.get('/invite-info', getInviteInfo);
+
+/**
+ * @swagger
+ * /auth/activate-invite:
+ *   post:
+ *     summary: 啟用邀請註冊
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 註冊成功
+ *       400:
+ *         description: token 無效或缺少參數
+ */
+router.post('/activate-invite', activateInvite);
 
 export default router; 

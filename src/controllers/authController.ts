@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { sendMail } from '../utils/email';
+import Organization from '../models/Organization';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 const JWT_EXPIRES_IN = '15m';
@@ -34,18 +35,37 @@ export const signup = async (req: Request, res: Response) => {
     // 產生 email 驗證 token
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
     const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小時
+    let orgId = organizationId;
+    let orgRole = 'member';
+    // 若無 organizationId，代表第一個註冊者，自動建立新組織
+    if (!organizationId) {
+      const org = await Organization.create({
+        name: 'Company_name',
+        type: 'endUser',
+        members: [],
+        status: 'active',
+        invitations: []
+      });
+      orgId = org._id;
+      orgRole = 'admin';
+    }
     const user = await User.create({
       email,
       passwordHash,
       firstName,
       lastName,
-      organizationId,
+      organizationId: orgId,
       role,
+      orgRole,
       phone,
       emailVerified: false,
       emailVerificationToken,
       emailVerificationExpires
     });
+    // 若是自動建立組織，將 user 加入 members
+    if (orgRole === 'admin') {
+      await Organization.findByIdAndUpdate(orgId, { $push: { members: user._id } });
+    }
     // 根據來源動態產生驗證連結
     const origin = req.headers.origin || req.headers.referer || 'https://dev-eolc.muldertech.co.uk';
     const verifyUrl = `${origin.replace(/\/$/, '')}/verify?email=${encodeURIComponent(email)}&token=${emailVerificationToken}`;
@@ -58,6 +78,8 @@ export const signup = async (req: Request, res: Response) => {
       success: true,
       data: {
         userId: user._id,
+        organizationId: orgId,
+        orgRole,
         emailVerificationRequired: true,
         message: 'Please check your email for verification'
       }

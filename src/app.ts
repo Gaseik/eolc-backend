@@ -60,7 +60,7 @@ app.use('/api-docs', cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
-app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/organizations', organizationRoutes);
 

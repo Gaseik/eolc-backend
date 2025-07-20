@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /api/users/getAllUsers:
+ * /users/getAllUsers:
  *   get:
  *     summary: 取得所有使用者（不含密碼）
  *     tags: [Users]
@@ -16,7 +16,7 @@
  *         description: 成功取得所有使用者
  */
 import { Router } from 'express';
-import { getAll, getMembers, inviteUser, getInviteInfo, activateInvite } from '../controllers/userController';
+import { getAll, getMembers, inviteUser } from '../controllers/userController';
 
 const router = Router();
 
@@ -51,6 +51,9 @@ router.get('/members', getMembers);
  *             properties:
  *               email:
  *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [regulatory, manufacturer, end user]
  *     responses:
  *       200:
  *         description: 邀請已送出
@@ -60,55 +63,5 @@ router.get('/members', getMembers);
  *         description: 未授權
  */
 router.post('/invite', inviteUser);
-
-/**
- * @swagger
- * /auth/invite-info:
- *   get:
- *     summary: 取得邀請資訊（註冊頁用）
- *     tags: [Users]
- *     parameters:
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *         description: 邀請 token
- *     responses:
- *       200:
- *         description: 邀請資訊
- *       400:
- *         description: token 無效
- */
-router.get('/auth/invite-info', getInviteInfo);
-
-/**
- * @swagger
- * /auth/activate-invite:
- *   post:
- *     summary: 啟用邀請註冊
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               token:
- *                 type: string
- *               password:
- *                 type: string
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *     responses:
- *       200:
- *         description: 註冊成功
- *       400:
- *         description: token 無效或缺少參數
- */
-router.post('/auth/activate-invite', activateInvite);
 
 export default router; 
