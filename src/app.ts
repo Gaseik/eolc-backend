@@ -56,7 +56,6 @@ app.use(cors({
     'Content-Disposition'
   ]
 }));
-app.use('/api-docs', cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());

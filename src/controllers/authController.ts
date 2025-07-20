@@ -43,9 +43,11 @@ export const signup = async (req: Request, res: Response) => {
       orgRole = null;
     } else if (!organizationId) {
       // 一般註冊，沒帶 organizationId，建立新組織，orgRole: 'admin'
+      // 確保 type 是有效的組織類型
+      const orgType = role === 'admin' ? 'endUser' : role as 'manufacturer' | 'regulator' | 'endUser';
       const org = await Organization.create({
         name: 'Company_name',
-        type: role, // type 與 user role 對應
+        type: orgType,
         members: [],
         status: 'active',
         invitations: []
@@ -76,11 +78,19 @@ export const signup = async (req: Request, res: Response) => {
     // 根據來源動態產生驗證連結
     const origin = req.headers.origin || req.headers.referer || 'https://dev-eolc.muldertech.co.uk';
     const verifyUrl = `${origin.replace(/\/$/, '')}/verify?email=${encodeURIComponent(email)}&token=${emailVerificationToken}`;
-    await sendMail({
-      to: email,
-      subject: 'EOLC 帳號驗證信',
-      html: `<p>您好，請點擊以下連結完成信箱驗證：</p><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>連結 24 小時內有效。</p>`
-    });
+    // 暫時註釋掉 email 發送，測試註冊功能
+    /*
+    try {
+      await sendMail({
+        to: email,
+        subject: 'EOLC 帳號驗證信',
+        html: `<p>您好，請點擊以下連結完成信箱驗證：</p><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>連結 24 小時內有效。</p>`
+      });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // 即使 email 發送失敗，也繼續完成註冊
+    }
+    */
     return res.status(201).json({
       success: true,
       data: {
