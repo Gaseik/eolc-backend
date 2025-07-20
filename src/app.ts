@@ -42,7 +42,20 @@ const corsOptions: CorsOptions = {
   ]
 };
 
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ],
+  exposedHeaders: [
+    'Content-Disposition'
+  ]
+}));
 app.use('/api-docs', cors(corsOptions));
 
 app.use(express.json());
