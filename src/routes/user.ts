@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /user/getAllUsers:
+ * /api/users/getAllUsers:
  *   get:
  *     summary: 取得所有使用者（不含密碼）
  *     tags: [Users]
