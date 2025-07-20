@@ -1,10 +1,10 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import userRoutes from './routes/user';
 import authRoutes from './routes/authRoutes';
 import organizationRoutes from './routes/organizationRoutes';
+import { CorsOptions } from 'cors';
 
 const app = express();
 
@@ -15,20 +15,35 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:8080',
   'http://127.0.0.1:3000',
-  'http://127.0.0.1:8080'
+  'http://127.0.0.1:8080',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // 允許所有來源（開發方便，正式環境建議改嚴格）
+const corsOptions: CorsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, true); // 允許所有來源
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
-}));
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ],
+  exposedHeaders: [
+    'Content-Disposition'
+  ]
+};
+
+app.use(cors(corsOptions));
+app.use('/api-docs', cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
