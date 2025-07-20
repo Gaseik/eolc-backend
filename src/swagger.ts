@@ -12,7 +12,10 @@ const options: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:8080', // 依你的 PORT 調整
+        url: 'https://api-eolc.muldertech.co.uk', // production domain
+      },
+      {
+        url: 'http://localhost:8080', // local dev
       },
     ],
   },
