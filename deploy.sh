@@ -1,20 +1,23 @@
 #!/bin/bash
 
-# 部署腳本
-echo "開始部署 EOLC Backend..."
+set -e
 
-# 建立 Docker 映像
-echo "建立 Docker 映像..."
-sudo docker build -t eolc-backend .
+echo "==== 1. 拉取最新程式碼 (Pull latest code) ===="
+git pull
 
-# 停止舊的容器
-echo "停止舊的容器..."
-sudo docker-compose down
+echo "==== 2. 安裝缺少的 devDependencies (Install missing devDependencies) ===="
+npm install --save-dev @types/nodemailer
 
-# 啟動新的容器
-echo "啟動新的容器..."
-sudo docker-compose up -d
+echo "==== 3. 關閉舊容器 (Stop old containers) ===="
+docker-compose down
 
-echo "部署完成！"
-echo "API 文件: http://your-ec2-ip:8080/api-docs" 
+echo "==== 4. 重新建構 Docker image (Rebuild Docker images) ===="
+docker-compose build --no-cache
 
+echo "==== 5. 背景啟動服務 (Start services in background) ===="
+docker-compose up -d
+
+echo "==== 6. 查看服務狀態 (Show service status) ===="
+docker-compose ps
+
+echo "==== 部署完成！(Deploy finished!) ===="
