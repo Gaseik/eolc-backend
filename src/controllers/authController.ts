@@ -36,18 +36,25 @@ export const signup = async (req: Request, res: Response) => {
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
     const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小時
     let orgId = organizationId;
-    let orgRole = 'member';
-    // 若無 organizationId，代表第一個註冊者，自動建立新組織
-    if (!organizationId) {
+    let orgRole = null;
+    // 平台 admin 註冊（僅允許 API/Swagger，不建立組織）
+    if (role === 'admin') {
+      orgId = null;
+      orgRole = null;
+    } else if (!organizationId) {
+      // 一般註冊，沒帶 organizationId，建立新組織，orgRole: 'admin'
       const org = await Organization.create({
         name: 'Company_name',
-        type: 'endUser',
+        type: role, // type 與 user role 對應
         members: [],
         status: 'active',
         invitations: []
       });
       orgId = org._id;
       orgRole = 'admin';
+    } else {
+      // 受邀註冊，加入現有組織，orgRole: 'member'
+      orgRole = 'member';
     }
     const user = await User.create({
       email,
@@ -63,7 +70,7 @@ export const signup = async (req: Request, res: Response) => {
       emailVerificationExpires
     });
     // 若是自動建立組織，將 user 加入 members
-    if (orgRole === 'admin') {
+    if (orgRole === 'admin' && orgId) {
       await Organization.findByIdAndUpdate(orgId, { $push: { members: user._id } });
     }
     // 根據來源動態產生驗證連結
