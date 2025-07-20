@@ -9,7 +9,8 @@
     "lint": "echo 'skipped lint'",
     "start": "NODE_ENV=production node ./dist/server.js",
     "test": "NODE_ENV=test vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "init": "ts-node scripts/createAdmin.ts"
   },
   "engines": {
     "node": ">=16.0.0"

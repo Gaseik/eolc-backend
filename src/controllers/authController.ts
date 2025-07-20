@@ -142,6 +142,47 @@ export const getProfile = async (req: Request, res: Response) => {
   }
 };
 
+// 更新個人資料
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    const { firstName, lastName, phone, avatar, settings } = req.body;
+    const update: any = {};
+    if (firstName !== undefined) update.firstName = firstName;
+    if (lastName !== undefined) update.lastName = lastName;
+    if (phone !== undefined) update.phone = phone;
+    if (avatar !== undefined) update.avatarUrl = avatar;
+    // 假如有通知設定
+    if (settings && settings.notifications) {
+      update['settings.notifications'] = settings.notifications;
+    }
+    update.updatedAt = new Date();
+    const user = await User.findByIdAndUpdate(userId, update, { new: true });
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: user._id,
+        email: user.email,
+        profile: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          avatar: user.avatarUrl
+        },
+        settings: {
+          twoFactorEnabled: user.twoFactorEnabled,
+          notifications: user.settings?.notifications || {}
+        },
+        updatedAt: user.updatedAt
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
+
 // Email 驗證
 export const emailVerification = async (req: Request, res: Response) => {
   try {
@@ -168,6 +209,57 @@ export const emailVerification = async (req: Request, res: Response) => {
         message: 'Email verified successfully'
       }
     });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
+
+// 忘記密碼
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, error: 'Missing email' });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(200).json({ success: true, message: 'If this email exists, a reset link has been sent.' });
+    // 產生重設密碼 token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1小時
+    user.emailVerificationToken = resetToken;
+    user.emailVerificationExpires = resetExpires;
+    await user.save();
+    // 產生重設連結
+    const origin = req.headers.origin || req.headers.referer || 'https://dev-eolc.muldertech.co.uk';
+    const resetUrl = `${origin.replace(/\/$/, '')}/reset-password?email=${encodeURIComponent(email)}&token=${resetToken}`;
+    await sendMail({
+      to: email,
+      subject: 'EOLC 密碼重設連結',
+      html: `<p>請點擊以下連結重設您的密碼：</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>連結 1 小時內有效。</p>`
+    });
+    return res.status(200).json({ success: true, message: 'If this email exists, a reset link has been sent.' });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
+
+// 重設密碼
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, token, newPassword } = req.body;
+    if (!email || !token || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Missing required fields' });
+    }
+    const user = await User.findOne({ email, emailVerificationToken: token });
+    if (!user) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired token' });
+    }
+    if (user.emailVerificationExpires && user.emailVerificationExpires < new Date()) {
+      return res.status(400).json({ success: false, error: 'Token expired' });
+    }
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+    return res.status(200).json({ success: true, message: 'Password reset successful' });
   } catch (err) {
     return res.status(500).json({ success: false, error: 'Server error' });
   }

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login, getProfile, emailVerification, logout, refreshToken } from '../controllers/authController';
+import { signup, login, getProfile, emailVerification, logout, refreshToken, updateProfile, forgotPassword, resetPassword } from '../controllers/authController';
 import { authAndRefresh } from '../utils/jwt';
 
 const router = Router();
@@ -78,8 +78,48 @@ router.post('/login', login);
  *         description: 成功取得個人資料
  *       401:
  *         description: 未授權
+ *   put:
+ *     summary: 更新用戶個人資料
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               avatar:
+ *                 type: string
+ *               settings:
+ *                 type: object
+ *                 properties:
+ *                   notifications:
+ *                     type: object
+ *                     properties:
+ *                       email:
+ *                         type: boolean
+ *                       sms:
+ *                         type: boolean
+ *                       push:
+ *                         type: boolean
+ *     responses:
+ *       200:
+ *         description: 更新成功
+ *       400:
+ *         description: 輸入資料錯誤
+ *       401:
+ *         description: 未授權
  */
 router.get('/profile', authAndRefresh, getProfile);
+router.put('/profile', authAndRefresh, updateProfile);
 
 /**
  * @swagger
@@ -142,5 +182,53 @@ router.post('/logout', logout);
  *         description: refresh token 無效
  */
 router.post('/refresh', refreshToken);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: 忘記密碼（寄送重設連結）
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 如果 email 存在，會寄送重設連結
+ */
+router.post('/forgot-password', forgotPassword);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: 重設密碼
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 密碼重設成功
+ *       400:
+ *         description: token 錯誤或過期
+ */
+router.post('/reset-password', resetPassword);
 
 export default router; 

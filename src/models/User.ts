@@ -17,6 +17,15 @@ export interface IUser extends Document {
   emailVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
+  settings?: {
+    notifications?: {
+      email?: boolean;
+      sms?: boolean;
+      push?: boolean;
+    }
+  };
+  orgRole?: 'admin' | 'member';
+  status?: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +45,15 @@ const UserSchema = new Schema<IUser>({
   emailVerified: { type: Boolean, default: false },
   emailVerificationToken: { type: String },
   emailVerificationExpires: { type: Date },
+  settings: {
+    notifications: {
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false },
+      push: { type: Boolean, default: true }
+    }
+  },
+  orgRole: { type: String, enum: ['admin', 'member'], default: 'member' },
+  status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
