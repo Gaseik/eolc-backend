@@ -8,26 +8,9 @@ import { CorsOptions } from 'cors';
 
 const app = express();
 
-// CORS 設定：允許 dev-eolc.muldertech.co.uk、api-eolc.muldertech.co.uk、localhost 及 127.0.0.1
-const allowedOrigins = [
-  'https://dev-eolc.muldertech.co.uk',
-  'https://api-eolc.muldertech.co.uk',
-  'http://localhost:3000',
-  'http://localhost:8080',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:8080',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173'
-];
-
+// CORS 設定：全開放
 const corsOptions: CorsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*', // 允許所有來源
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
@@ -35,27 +18,18 @@ const corsOptions: CorsOptions = {
     'Authorization',
     'X-Requested-With',
     'Accept',
-    'Origin'
+    'Origin',
+    'Access-Control-Allow-Origin',
+    'Access-Control-Allow-Credentials',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Methods'
   ],
   exposedHeaders: [
     'Content-Disposition'
   ]
 };
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin'
-  ],
-  exposedHeaders: [
-    'Content-Disposition'
-  ]
-}));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
