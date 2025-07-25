@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login, getProfile, emailVerification, logout, refreshToken, updateProfile, forgotPassword, resetPassword } from '../controllers/authController';
+import { signup, login, getProfile, emailVerification, logout, refreshToken, updateProfile, forgotPassword, resetPassword, checkAuth } from '../controllers/authController';
 import { getInviteInfo, activateInvite } from '../controllers/userController';
 import { authAndRefresh } from '../utils/jwt';
 
@@ -119,6 +119,7 @@ router.post('/login', login);
  *       401:
  *         description: 未授權
  */
+router.get('/check', authAndRefresh, checkAuth);
 router.get('/profile', authAndRefresh, getProfile);
 router.put('/profile', authAndRefresh, updateProfile);
 

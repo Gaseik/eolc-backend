@@ -107,11 +107,18 @@ export const login = async (req: Request, res: Response) => {
     // TODO: 2FA 驗證
     const token = generateToken(user);
     const refreshToken = generateRefreshToken(user);
+    
+    // 設定 httpOnly cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7天
+    });
+    
     return res.status(200).json({
       success: true,
       data: {
-        token,
-        refreshToken,
         user: {
           id: user._id,
           email: user.email,
@@ -293,13 +300,50 @@ export const resetPassword = async (req: Request, res: Response) => {
 // 登出
 export const logout = async (req: Request, res: Response) => {
   try {
-    // 清除 httpOnly cookie（如果有）
-    res.clearCookie('token');
-    res.clearCookie('refreshToken');
-    // TODO: 若有 refresh token 存資料庫，也可在這裡移除
+    // 清除 httpOnly cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
     return res.status(200).json({
       success: true,
       message: 'Logged out successfully'
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
+
+// 檢查登入狀態
+export const checkAuth = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'User not found' });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          role: user.role,
+          organizationId: user.organizationId,
+          twoFactorEnabled: user.twoFactorEnabled,
+          profile: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phone: user.phone
+          }
+        }
+      }
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: 'Server error' });
