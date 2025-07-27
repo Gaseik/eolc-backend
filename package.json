@@ -11,7 +11,8 @@
     "start": "NODE_ENV=production node ./dist/server.js",
     "test": "NODE_ENV=test vitest",
     "type-check": "tsc --noEmit",
-    "init": "ts-node scripts/createAdmin.ts"
+    "init": "ts-node scripts/createAdmin.ts",
+    "migrate:users-to-orgs": "ts-node src/scripts/migrate-users-to-organizations.ts"
   },
   "engines": {
     "node": ">=16.0.0"

@@ -46,8 +46,9 @@ export const signup = async (req: Request, res: Response) => {
       // 確保 type 是有效的組織類型
       const orgType = role === 'admin' ? 'endUser' : role as 'manufacturer' | 'regulator' | 'endUser';
       const org = await Organization.create({
-        name: 'Company_name',
+        name: `${firstName} ${lastName}'s Organization`, // 使用用戶姓名作為初始組織名稱
         type: orgType,
+        address: undefined, // 新增 address 欄位，設為 undefined
         members: [],
         status: 'active',
         invitations: []
@@ -179,12 +180,11 @@ export const updateProfile = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
-    const { firstName, lastName, phone, avatar, settings } = req.body;
+    const { firstName, lastName, phone, settings } = req.body;
     const update: any = {};
     if (firstName !== undefined) update.firstName = firstName;
     if (lastName !== undefined) update.lastName = lastName;
     if (phone !== undefined) update.phone = phone;
-    if (avatar !== undefined) update.avatarUrl = avatar;
     // 假如有通知設定
     if (settings && settings.notifications) {
       update['settings.notifications'] = settings.notifications;
@@ -200,15 +200,48 @@ export const updateProfile = async (req: Request, res: Response) => {
         profile: {
           firstName: user.firstName,
           lastName: user.lastName,
-          phone: user.phone,
-          avatar: user.avatarUrl
+          phone: user.phone
         },
         settings: {
-          twoFactorEnabled: user.twoFactorEnabled,
           notifications: user.settings?.notifications || {}
         },
         updatedAt: user.updatedAt
       }
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
+
+// 修改密碼（需要驗證舊密碼）
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Current password and new password are required' });
+    }
+    
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    
+    // 驗證舊密碼
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isPasswordValid) {
+      return res.status(400).json({ success: false, error: 'Current password is incorrect' });
+    }
+    
+    // 加密新密碼
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    user.updatedAt = new Date();
+    await user.save();
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Password changed successfully'
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: 'Server error' });

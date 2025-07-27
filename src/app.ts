@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import userRoutes from './routes/user';
 import authRoutes from './routes/authRoutes';
 import organizationRoutes from './routes/organizationRoutes';
+import modelRoutes from './routes/ModelRoutes';
+import roleRoutes from './routes/roleRoutes';
 import { CorsOptions } from 'cors';
 
 const app = express();
@@ -46,7 +48,8 @@ const corsOptions: CorsOptions = {
     'Access-Control-Allow-Methods'
   ],
   exposedHeaders: [
-    'Content-Disposition'
+    'Content-Disposition',
+    'x-access-token'
   ]
 };
 
@@ -57,5 +60,7 @@ app.use(cookieParser());
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/organizations', organizationRoutes);
+app.use('/models', modelRoutes);
+app.use('/roles', roleRoutes);
 
 export default app; 

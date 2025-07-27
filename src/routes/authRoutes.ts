@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login, getProfile, emailVerification, logout, refreshToken, updateProfile, forgotPassword, resetPassword, checkAuth } from '../controllers/authController';
+import { signup, login, getProfile, emailVerification, logout, refreshToken, updateProfile, forgotPassword, resetPassword, checkAuth, changePassword } from '../controllers/authController';
 import { getInviteInfo, activateInvite } from '../controllers/userController';
 import { authAndRefresh } from '../utils/jwt';
 
@@ -122,6 +122,37 @@ router.post('/login', login);
 router.get('/check', authAndRefresh, checkAuth);
 router.get('/profile', authAndRefresh, getProfile);
 router.put('/profile', authAndRefresh, updateProfile);
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   put:
+ *     summary: 修改密碼（需要驗證舊密碼）
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 description: 當前密碼
+ *               newPassword:
+ *                 type: string
+ *                 description: 新密碼
+ *     responses:
+ *       200:
+ *         description: 密碼修改成功
+ *       400:
+ *         description: 缺少必要欄位或當前密碼錯誤
+ *       401:
+ *         description: 未授權
+ */
+router.put('/change-password', authAndRefresh, changePassword);
 
 /**
  * @swagger

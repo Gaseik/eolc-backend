@@ -38,36 +38,85 @@ export const getOrganizations = async (req: Request, res: Response) => {
 export const getOrganizationById = async (req: Request, res: Response) => {
   try {
     const org = await Organization.findById(req.params.id);
-    if (!org) return res.status(404).json({ message: '找不到組織' });
-    res.json(org);
+    if (!org) return res.status(404).json({ success: false, error: 'Organization not found' });
+    res.json({ success: true, data: org });
   } catch (err) {
-    res.status(500).json({ message: '取得組織失敗', error: err });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 };
 
-export const createOrganization = async (req: Request, res: Response) => {
+// 獲取當前用戶的組織資訊
+export const getMyOrganization = async (req: RequestWithUser, res: Response) => {
   try {
-    const { name, type } = req.body;
-    const org = new Organization({ name, type, members: [], status: 'active', invitations: [] });
-    await org.save();
-    res.status(201).json(org);
+    console.log('Request user object:', (req as any).user);
+    const userId = (req as any).user?.id;
+    console.log('Extracted userId:', userId);
+    
+    if (!userId) {
+      console.log('No userId found in request');
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+    
+    const user = await User.findById(userId);
+    console.log('Found user:', user ? 'yes' : 'no');
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    
+    console.log('User organizationId:', user.organizationId);
+    if (!user.organizationId) {
+      return res.status(404).json({ success: false, error: 'User does not belong to any organization' });
+    }
+    
+    const org = await Organization.findById(user.organizationId);
+    console.log('Found organization:', org ? 'yes' : 'no');
+    if (!org) return res.status(404).json({ success: false, error: 'Organization not found' });
+    
+    res.json({
+      success: true,
+      data: org
+    });
   } catch (err) {
-    res.status(500).json({ message: '建立組織失敗', error: err });
+    console.error('getMyOrganization error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 };
 
-export const updateOrganization = async (req: Request, res: Response) => {
+
+
+export const updateOrganization = async (req: RequestWithUser, res: Response) => {
   try {
-    const { name, type, status } = req.body;
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+    
+    const { name, type, status, address } = req.body;
+    const orgId = req.params.id;
+    
+    // 檢查用戶是否屬於該組織
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    
+    if (user.organizationId?.toString() !== orgId) {
+      return res.status(403).json({ success: false, error: 'You can only update your own organization' });
+    }
+    
+    const updateData: any = { updatedAt: new Date() };
+    if (name !== undefined) updateData.name = name;
+    if (type !== undefined) updateData.type = type;
+    if (status !== undefined) updateData.status = status;
+    if (address !== undefined) updateData.address = address;
+    
     const org = await Organization.findByIdAndUpdate(
-      req.params.id,
-      { name, type, status, updatedAt: new Date() },
+      orgId,
+      updateData,
       { new: true }
     );
-    if (!org) return res.status(404).json({ message: '找不到組織' });
-    res.json(org);
+    if (!org) return res.status(404).json({ success: false, error: 'Organization not found' });
+    
+    res.json({
+      success: true,
+      data: org
+    });
   } catch (err) {
-    res.status(500).json({ message: '更新組織失敗', error: err });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 };
 

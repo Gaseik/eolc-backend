@@ -96,14 +96,14 @@ export class ModelService {
       throw new Error('Model not found');
     }
 
-    // 檢查權限：創建者或 regulatory 可以更新
-    if (model.createdBy.toString() !== userId && user.role !== 'regulatory') {
+    // 檢查權限：創建者或 regulator 可以更新
+    if (model.createdBy.toString() !== userId && user.role !== 'regulator') {
       throw new Error('Unauthorized to update this model');
     }
 
-    // 如果是 regulatory 更新，設置 approvedBy
-    if (user.role === 'regulatory') {
-      updateData.approvedBy = userId;
+    // 如果是 regulator 更新，設置 approvedBy
+    if (user.role === 'regulator') {
+      updateData.approvedBy = new mongoose.Types.ObjectId(userId);
     }
 
     return await Model.findByIdAndUpdate(id, updateData, { new: true });

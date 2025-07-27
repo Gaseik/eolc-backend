@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as organizationController from '../controllers/organizationController';
+import { authAndRefresh } from '../utils/jwt';
 
 const router = Router();
 
@@ -29,7 +30,7 @@ const router = Router();
  *       200:
  *         description: 組織列表
  */
-router.get('/', organizationController.getOrganizations);
+router.get('/', authAndRefresh, organizationController.getOrganizations);
 
 /**
  * @swagger
@@ -37,6 +38,8 @@ router.get('/', organizationController.getOrganizations);
  *   get:
  *     summary: 取得單一組織
  *     tags: [Organizations]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -47,34 +50,32 @@ router.get('/', organizationController.getOrganizations);
  *     responses:
  *       200:
  *         description: 組織資料
+ *       401:
+ *         description: 未授權
  *       404:
  *         description: 找不到組織
  */
-router.get('/:id', organizationController.getOrganizationById);
+router.get('/:id', authAndRefresh, organizationController.getOrganizationById);
 
 /**
  * @swagger
- * /organizations:
- *   post:
- *     summary: 新增組織
+ * /organizations/my:
+ *   get:
+ *     summary: 取得當前用戶的組織資訊
  *     tags: [Organizations]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               type:
- *                 type: string
- *                 enum: [manufacturer, regulator, endUser]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
- *       201:
- *         description: 新增成功
+ *       200:
+ *         description: 組織資料
+ *       401:
+ *         description: 未授權
+ *       404:
+ *         description: 找不到組織或用戶不屬於任何組織
  */
-router.post('/', organizationController.createOrganization);
+router.get('/my', authAndRefresh, organizationController.getMyOrganization);
+
+
 
 /**
  * @swagger
@@ -82,6 +83,8 @@ router.post('/', organizationController.createOrganization);
  *   put:
  *     summary: 更新組織
  *     tags: [Organizations]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -101,16 +104,21 @@ router.post('/', organizationController.createOrganization);
  *               type:
  *                 type: string
  *                 enum: [manufacturer, regulator, endUser]
+ *               address:
+ *                 type: string
+ *                 description: 組織地址（選填）
  *               status:
  *                 type: string
  *                 enum: [active, inactive]
  *     responses:
  *       200:
  *         description: 更新成功
+ *       401:
+ *         description: 未授權
  *       404:
  *         description: 找不到組織
  */
-router.put('/:id', organizationController.updateOrganization);
+router.put('/:id', authAndRefresh, organizationController.updateOrganization);
 
 /**
  * @swagger
@@ -118,6 +126,8 @@ router.put('/:id', organizationController.updateOrganization);
  *   delete:
  *     summary: 刪除組織
  *     tags: [Organizations]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -128,10 +138,12 @@ router.put('/:id', organizationController.updateOrganization);
  *     responses:
  *       204:
  *         description: 刪除成功
+ *       401:
+ *         description: 未授權
  *       404:
  *         description: 找不到組織
  */
-router.delete('/:id', organizationController.deleteOrganization);
+router.delete('/:id', authAndRefresh, organizationController.deleteOrganization);
 
 /**
  * @swagger
@@ -139,6 +151,8 @@ router.delete('/:id', organizationController.deleteOrganization);
  *   post:
  *     summary: 邀請成員加入組織
  *     tags: [Organizations]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -158,10 +172,12 @@ router.delete('/:id', organizationController.deleteOrganization);
  *     responses:
  *       200:
  *         description: 邀請已送出
+ *       401:
+ *         description: 未授權
  *       404:
  *         description: 找不到組織
  */
-router.post('/:id/invite', organizationController.inviteMember);
+router.post('/:id/invite', authAndRefresh, organizationController.inviteMember);
 
 /**
  * @swagger

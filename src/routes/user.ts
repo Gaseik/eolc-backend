@@ -17,10 +17,11 @@
  */
 import { Router } from 'express';
 import { getAll, getMembers, inviteUser } from '../controllers/userController';
+import { authAndRefresh } from '../utils/jwt';
 
 const router = Router();
 
-router.get('/getAllUsers', getAll);
+router.get('/getAllUsers', authAndRefresh, getAll);
 
 /**
  * @swagger
@@ -28,13 +29,17 @@ router.get('/getAllUsers', getAll);
  *   get:
  *     summary: 取得該組織所有成員（僅 admin 可查詢）
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: 成員列表
  *       403:
  *         description: 僅 admin 可查詢成員
+ *       401:
+ *         description: 未授權
  */
-router.get('/members', getMembers);
+router.get('/members', authAndRefresh, getMembers);
 
 /**
  * @swagger
@@ -42,6 +47,8 @@ router.get('/members', getMembers);
  *   post:
  *     summary: 邀請用戶加入組織（預設為非 admin）
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -62,6 +69,6 @@ router.get('/members', getMembers);
  *       401:
  *         description: 未授權
  */
-router.post('/invite', inviteUser);
+router.post('/invite', authAndRefresh, inviteUser);
 
 export default router; 
