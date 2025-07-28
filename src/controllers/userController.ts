@@ -32,6 +32,53 @@ export const getMembers = async (req: RequestWithUser, res: Response) => {
   }
 };
 
+// 獲取所有 regulatory users
+export const getRegulatoryUsers = async (req: RequestWithUser, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+    // 檢查用戶是否存在
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+
+    // 獲取所有 regulatory users
+    const regulatoryUsers = await User.find({ 
+      role: 'regulator'
+    }).select('_id firstName lastName email organizationId role');
+
+    // 獲取相關的組織資訊
+    const organizationIds = [...new Set(regulatoryUsers.map(user => user.organizationId))];
+    const organizations = await Organization.find({ 
+      _id: { $in: organizationIds } 
+    }).select('_id name type').lean();
+
+    // 組合用戶和組織資訊
+    const usersWithOrg = regulatoryUsers.map(user => {
+      const org = organizations.find(org => org._id.toString() === user.organizationId?.toString());
+      return {
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        role: user.role,
+        organization: org ? {
+          id: org._id,
+          name: org.name,
+          type: org.type
+        } : null
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: usersWithOrg
+    });
+  } catch (err) {
+    console.error('Get regulatory users error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
+
 // 邀請用戶加入組織（預設為非 admin，動態產生註冊連結並發送 email）
 export const inviteUser = async (req: RequestWithUser, res: Response) => {
   try {

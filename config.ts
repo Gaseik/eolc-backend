@@ -15,8 +15,8 @@ if (NODE_ENV === 'dev') {
   });
 } else {
   result2 = dotenv.config({
-    path: path.resolve(process.cwd(), `.env.${NODE_ENV}`),
-  });
+  path: path.resolve(process.cwd(), `.env.${NODE_ENV}`),
+});
 }
 if (result2.error) {
   throw result2.error;

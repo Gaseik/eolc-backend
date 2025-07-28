@@ -16,7 +16,7 @@
  *         description: 成功取得所有使用者
  */
 import { Router } from 'express';
-import { getAll, getMembers, inviteUser } from '../controllers/userController';
+import { getAll, getMembers, inviteUser, getRegulatoryUsers } from '../controllers/userController';
 import { authAndRefresh } from '../utils/jwt';
 
 const router = Router();
@@ -40,6 +40,58 @@ router.get('/getAllUsers', authAndRefresh, getAll);
  *         description: 未授權
  */
 router.get('/members', authAndRefresh, getMembers);
+
+/**
+ * @swagger
+ * /users/regulatory-users:
+ *   get:
+ *     summary: 獲取所有 regulatory users
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 成功獲取 regulatory users 列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: 用戶 ID
+ *                       name:
+ *                         type: string
+ *                         description: 用戶姓名
+ *                       email:
+ *                         type: string
+ *                         description: 用戶郵箱
+ *                       role:
+ *                         type: string
+ *                         description: 用戶角色
+ *                       organization:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             description: 組織 ID
+ *                           name:
+ *                             type: string
+ *                             description: 組織名稱
+ *                           type:
+ *                             type: string
+ *                             description: 組織類型
+ *       401:
+ *         description: 未授權
+ */
+router.get('/regulatory-users', authAndRefresh, getRegulatoryUsers);
 
 /**
  * @swagger

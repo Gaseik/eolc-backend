@@ -39,7 +39,26 @@ export const getOrganizationById = async (req: Request, res: Response) => {
   try {
     const org = await Organization.findById(req.params.id);
     if (!org) return res.status(404).json({ success: false, error: 'Organization not found' });
-    res.json({ success: true, data: org });
+    
+    // 確保返回完整的組織資料，包括所有可能的欄位
+    const fullOrgData = {
+      _id: org._id,
+      name: org.name,
+      type: org.type,
+      address: org.address || null,
+      taxId: org.taxId || null,
+      email: org.email || null,
+      contactPhone: org.contactPhone || null,
+      website: org.website || null,
+      members: org.members,
+      status: org.status,
+      invitations: org.invitations,
+      createdAt: org.createdAt,
+      updatedAt: org.updatedAt,
+      __v: org.__v
+    };
+    
+    res.json({ success: true, data: fullOrgData });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Server error' });
   }
@@ -87,8 +106,10 @@ export const updateOrganization = async (req: RequestWithUser, res: Response) =>
     const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
     
-    const { name, type, status, address } = req.body;
+    const { name, status, address, taxId, email, contactPhone, website } = req.body;
     const orgId = req.params.id;
+    
+    console.log('Update request body:', req.body);
     
     // 檢查用戶是否屬於該組織
     const user = await User.findById(userId);
@@ -98,24 +119,52 @@ export const updateOrganization = async (req: RequestWithUser, res: Response) =>
       return res.status(403).json({ success: false, error: 'You can only update your own organization' });
     }
     
+    // 構建完整的更新數據，包括所有可能的欄位
     const updateData: any = { updatedAt: new Date() };
     if (name !== undefined) updateData.name = name;
-    if (type !== undefined) updateData.type = type;
     if (status !== undefined) updateData.status = status;
     if (address !== undefined) updateData.address = address;
+    if (taxId !== undefined) updateData.taxId = taxId;
+    if (email !== undefined) updateData.email = email;
+    if (contactPhone !== undefined) updateData.contactPhone = contactPhone;
+    if (website !== undefined) updateData.website = website;
     
+    console.log('Update data:', updateData);
+    
+    // 使用 $set 來確保新欄位被正確設置，並使用 upsert: false 來避免創建新記錄
     const org = await Organization.findByIdAndUpdate(
       orgId,
-      updateData,
-      { new: true }
+      { $set: updateData },
+      { new: true, runValidators: true, upsert: false }
     );
     if (!org) return res.status(404).json({ success: false, error: 'Organization not found' });
     
+    console.log('Updated organization:', org);
+    
+    // 確保返回完整的組織資料，包括所有可能的欄位
+    const fullOrgData = {
+      _id: org._id,
+      name: org.name,
+      type: org.type,
+      address: org.address || null,
+      taxId: org.taxId || null,
+      email: org.email || null,
+      contactPhone: org.contactPhone || null,
+      website: org.website || null,
+      members: org.members,
+      status: org.status,
+      invitations: org.invitations,
+      createdAt: org.createdAt,
+      updatedAt: org.updatedAt,
+      __v: org.__v
+    };
+    
     res.json({
       success: true,
-      data: org
+      data: fullOrgData
     });
   } catch (err) {
+    console.error('Update organization error:', err);
     res.status(500).json({ success: false, error: 'Server error' });
   }
 };

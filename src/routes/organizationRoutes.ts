@@ -101,15 +101,26 @@ router.get('/my', authAndRefresh, organizationController.getMyOrganization);
  *             properties:
  *               name:
  *                 type: string
- *               type:
- *                 type: string
- *                 enum: [manufacturer, regulator, endUser]
+ *                 description: 組織名稱
  *               address:
  *                 type: string
  *                 description: 組織地址（選填）
+ *               taxId:
+ *                 type: string
+ *                 description: 稅號（選填）
+ *               email:
+ *                 type: string
+ *                 description: 組織聯絡郵箱（選填）
+ *               contactPhone:
+ *                 type: string
+ *                 description: 組織聯絡電話（選填）
+ *               website:
+ *                 type: string
+ *                 description: 組織網站（選填）
  *               status:
  *                 type: string
  *                 enum: [active, inactive]
+ *                 description: 組織狀態
  *     responses:
  *       200:
  *         description: 更新成功
