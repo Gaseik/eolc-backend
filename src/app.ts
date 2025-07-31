@@ -10,6 +10,16 @@ import { CorsOptions } from 'cors';
 
 const app = express();
 
+// 效能監控中間件
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`${req.method} ${req.originalUrl} - ${res.statusCode} - ${duration}ms`);
+  });
+  next();
+});
+
 // CORS 設定：開發環境
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
@@ -55,8 +65,17 @@ const corsOptions: CorsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(express.json());
+// 設定 JSON 解析限制以提升效能
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// 靜態檔案快取設定
+app.use(express.static('public', {
+  maxAge: '1h',
+  etag: true
+}));
+
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/organizations', organizationRoutes);

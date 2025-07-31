@@ -164,12 +164,32 @@ export const getModels = async (req: RequestWithUser, res: Response) => {
     const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
 
-    const { page = 1, limit = 10, search = '', status } = req.query;
+    const { page = 1, limit = 10, search = '', status, scope = 'my' } = req.query;
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
 
     // 構建查詢條件
-    const query: any = { organizationId: user.organizationId };
+    const query: any = {};
+    
+    // 根據 scope 參數決定查詢範圍
+    if (scope === 'my') {
+      // 只查詢自己組織的模型
+      query.organizationId = user.organizationId;
+    } else if (scope === 'all') {
+      // 查詢所有組織的模型（需要適當權限）
+      if (user.role !== 'admin' && user.role !== 'regulator') {
+        return res.status(403).json({ 
+          success: false, 
+          error: 'Access denied. Only admin and regulator can view all models.' 
+        });
+      }
+      // 不添加 organizationId 限制，查詢所有模型
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid scope parameter. Use "my" or "all".' 
+      });
+    }
     
     if (search) {
       query.$or = [
@@ -186,6 +206,7 @@ export const getModels = async (req: RequestWithUser, res: Response) => {
     const models = await Model.find(query)
       .populate('createdBy', 'firstName lastName email')
       .populate('approvers.id', 'firstName lastName email')
+      .populate('organizationId', 'name')
       .skip((+page - 1) * +limit)
       .limit(+limit)
       .sort({ createdAt: -1 })
@@ -193,9 +214,17 @@ export const getModels = async (req: RequestWithUser, res: Response) => {
 
     const total = await Model.countDocuments(query);
 
+    // 重構響應數據，將 organizationId 重命名為 organization
+    const responseData = models.map(model => {
+      const modelObj = model.toObject() as any;
+      modelObj.organization = modelObj.organizationId;
+      delete modelObj.organizationId;
+      return modelObj;
+    });
+
     res.json({
       success: true,
-      data: models,
+      data: responseData,
       pagination: {
         page: +page,
         limit: +limit,
@@ -222,18 +251,27 @@ export const getModelById = async (req: RequestWithUser, res: Response) => {
     const model = await Model.findById(modelId)
       .populate('createdBy', 'firstName lastName email')
       .populate('approvers.id', 'firstName lastName email')
-      .populate('organizationId', 'name');
+      .populate('organizationId', 'name type address taxId email contactPhone website');
 
     if (!model) return res.status(404).json({ success: false, error: 'Model not found' });
 
     // 檢查用戶是否有權限查看此模型
-    if (model.organizationId.toString() !== user.organizationId?.toString()) {
+    // 當 organizationId 被 populate 後，需要使用 _id 來獲取 ObjectId
+    const modelOrgId = model.organizationId._id ? model.organizationId._id.toString() : model.organizationId.toString();
+    const userOrgId = user.organizationId?.toString();
+    
+    if (modelOrgId !== userOrgId) {
       return res.status(403).json({ success: false, error: 'Access denied' });
     }
 
+    // 重構響應數據，將 organizationId 重命名為 organization
+    const responseData = model.toObject() as any;
+    responseData.organization = responseData.organizationId;
+    delete responseData.organizationId;
+    
     res.json({
       success: true,
-      data: model
+      data: responseData
     });
   } catch (err) {
     console.error('Get model by id error:', err);
