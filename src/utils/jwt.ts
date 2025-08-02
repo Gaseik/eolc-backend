@@ -17,10 +17,19 @@ export async function authAndRefresh(req: Request, res: Response, next: NextFunc
     console.log('authAndRefresh middleware called');
     console.log('Cookies:', req.cookies);
     console.log('Token from cookies:', req.cookies.token);
+    console.log('Authorization header:', req.headers.authorization);
     
-    const token = req.cookies.token;
+    // 從 cookies 或 Authorization header 獲取 token
+    let token = req.cookies.token;
+    if (!token && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
+    
     if (!token) {
-      console.log('No token found in cookies');
+      console.log('No token found in cookies or Authorization header');
       return res.status(401).json({ success: false, error: 'No token' });
     }
     

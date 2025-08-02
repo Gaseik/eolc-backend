@@ -425,4 +425,23 @@ export const updateMemberRole = async (req: Request, res: Response) => {
   } catch (err) {
     res.status(500).json({ message: '更新角色失敗', error: err });
   }
+};
+
+// 獲取所有終端用戶公司
+export const getAllEndUserCompanies = async (req: Request, res: Response) => {
+  try {
+    // 直接獲取所有 type 為 endUser 的組織
+    const companies = await Organization.find({ type: 'endUser' })
+      .select('name type address email contactPhone')
+      .sort({ name: 1 });
+
+    res.json({
+      success: true,
+      data: companies,
+      count: companies.length
+    });
+  } catch (err) {
+    console.error('Get all end user companies error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
 }; 

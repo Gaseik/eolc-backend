@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IOrder extends Document {
   modelId: mongoose.Types.ObjectId;
   batchNumber: string;
-  endUserCompany: string; // 直接存公司名稱
+  endUserCompanyId: mongoose.Types.ObjectId; // 關聯到 Organization
   status: 'pending' | 'in_production' | 'completed' | 'disposed';
   producedQuantity: number;
   inUseQuantity: number;
@@ -25,10 +25,10 @@ const orderSchema = new Schema<IOrder>({
     required: true,
     trim: true
   },
-  endUserCompany: {
-    type: String,
-    required: true,
-    trim: true
+  endUserCompanyId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Organization',
+    required: true
   },
   status: {
     type: String,
@@ -80,6 +80,7 @@ orderSchema.pre('save', function(next) {
 // 索引
 orderSchema.index({ batchNumber: 1 });
 orderSchema.index({ modelId: 1 });
+orderSchema.index({ endUserCompanyId: 1 });
 orderSchema.index({ createdBy: 1 });
 orderSchema.index({ status: 1 });
 

@@ -5,6 +5,7 @@ import userRoutes from './routes/user';
 import authRoutes from './routes/authRoutes';
 import organizationRoutes from './routes/organizationRoutes';
 import modelRoutes from './routes/ModelRoutes';
+import orderRoutes from './routes/orderRoutes';
 import roleRoutes from './routes/roleRoutes';
 import { CorsOptions } from 'cors';
 
@@ -80,6 +81,7 @@ app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/organizations', organizationRoutes);
 app.use('/models', modelRoutes);
+app.use('/orders', orderRoutes);
 app.use('/roles', roleRoutes);
 
 export default app; 

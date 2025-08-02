@@ -55,7 +55,21 @@ router.get('/', authAndRefresh, organizationController.getOrganizations);
  *       404:
  *         description: 找不到組織
  */
-router.get('/:id', authAndRefresh, organizationController.getOrganizationById);
+/**
+ * @swagger
+ * /organizations/end-users:
+ *   get:
+ *     summary: 獲取所有終端用戶公司
+ *     tags: [Organizations]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 成功獲取公司列表
+ *       401:
+ *         description: 未授權
+ */
+router.get('/end-users', authAndRefresh, organizationController.getAllEndUserCompanies);
 
 /**
  * @swagger
@@ -74,6 +88,8 @@ router.get('/:id', authAndRefresh, organizationController.getOrganizationById);
  *         description: 找不到組織或用戶不屬於任何組織
  */
 router.get('/my', authAndRefresh, organizationController.getMyOrganization);
+
+router.get('/:id', authAndRefresh, organizationController.getOrganizationById);
 
 
 
