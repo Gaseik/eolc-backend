@@ -21,6 +21,7 @@ function generateRefreshToken(user: IUser) {
 }
 
 // 註冊
+// POST /api/auth/signup
 export const signup = async (req: Request, res: Response) => {
   try {
     const { email, password, firstName, lastName, organizationId, role, phone } = req.body;
@@ -89,6 +90,105 @@ export const signup = async (req: Request, res: Response) => {
       }
     });
   } catch (err) {
+    return res.status(500).json({ success: false, error: 'Server error' });
+  }
+};
+
+// 直接加入指定組織的註冊
+// POST /api/auth/signup-with-organization
+export const signupWithOrganization = async (req: Request, res: Response) => {
+  try {
+    const { email, password, firstName, lastName, organizationId, role, orgRole, phone } = req.body;
+    
+    // 驗證必要欄位
+    if (!email || !password || !firstName || !lastName || !organizationId || !role) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required fields: email, password, firstName, lastName, organizationId, role' 
+      });
+    }
+    
+    // 檢查 email 是否已存在
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ success: false, error: 'Email already exists' });
+    }
+    
+    // 檢查組織是否存在
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      return res.status(400).json({ success: false, error: 'Organization not found' });
+    }
+    
+    // 檢查組織狀態
+    if (organization.status !== 'active') {
+      return res.status(400).json({ success: false, error: 'Organization is not active' });
+    }
+    
+    // 檢查角色是否與組織類型匹配
+    const validRoleForOrgType = {
+      'manufacturer': ['manufacturer'],
+      'regulator': ['regulator'],
+      'endUser': ['endUser']
+    };
+    
+    const allowedRoles = validRoleForOrgType[organization.type as keyof typeof validRoleForOrgType];
+    if (!allowedRoles || !allowedRoles.includes(role as any)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: `Role '${role}' is not valid for organization type '${organization.type}'` 
+      });
+    }
+    
+    // 驗證 orgRole 參數
+    const validOrgRoles = ['admin', 'member'];
+    const finalOrgRole = orgRole && validOrgRoles.includes(orgRole) ? orgRole : 'member';
+    
+    const passwordHash = await bcrypt.hash(password, 10);
+    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    
+    // 創建用戶
+    const user = await User.create({
+      email,
+      passwordHash,
+      firstName,
+      lastName,
+      organizationId,
+      role,
+      orgRole: finalOrgRole, // 明確設置 orgRole
+      phone,
+      emailVerified: true,
+      emailVerificationToken,
+      emailVerificationExpires
+    });
+    
+    // 將用戶加入組織的 members 列表
+    await Organization.findByIdAndUpdate(organizationId, { 
+      $push: { members: user._id } 
+    });
+    
+    // 返回詳細信息
+    const populatedUser = await User.findById(user._id)
+      .populate('organizationId', 'name type address email contactPhone website taxId');
+    
+    return res.status(201).json({
+      success: true,
+      data: {
+        user: {
+          id: populatedUser!._id,
+          email: populatedUser!.email,
+          firstName: populatedUser!.firstName,
+          lastName: populatedUser!.lastName,
+          role: populatedUser!.role,
+          orgRole: populatedUser!.orgRole,
+          organization: populatedUser!.organizationId
+        },
+        message: 'User registered and added to organization successfully'
+      }
+    });
+  } catch (err) {
+    console.error('Signup with organization error:', err);
     return res.status(500).json({ success: false, error: 'Server error' });
   }
 };

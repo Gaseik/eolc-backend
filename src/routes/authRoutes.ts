@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login, getProfile, emailVerification, logout, refreshToken, updateProfile, forgotPassword, resetPassword, checkAuth, changePassword } from '../controllers/authController';
+import { signup, signupWithOrganization, login, getProfile, emailVerification, logout, refreshToken, updateProfile, forgotPassword, resetPassword, checkAuth, changePassword } from '../controllers/authController';
 import { getInviteInfo, activateInvite } from '../controllers/userController';
 import { authAndRefresh } from '../utils/jwt';
 
@@ -40,6 +40,112 @@ const router = Router();
  *         description: Email 已存在
  */
 router.post('/signup', signup);
+
+/**
+ * @swagger
+ * /auth/signup-with-organization:
+ *   post:
+ *     summary: 直接加入指定組織的用戶註冊
+ *     description: 此 API 允許用戶直接註冊並加入指定的組織，無需系統自動創建新組織。支援指定用戶在組織內的職別（orgRole）。
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - firstName
+ *               - lastName
+ *               - organizationId
+ *               - role
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: 用戶郵箱
+ *               password:
+ *                 type: string
+ *                 description: 用戶密碼
+ *               firstName:
+ *                 type: string
+ *                 description: 用戶名字
+ *               lastName:
+ *                 type: string
+ *                 description: 用戶姓氏
+ *               organizationId:
+ *                 type: string
+ *                 description: 要加入的組織 ID（必填）
+ *               role:
+ *                 type: string
+ *                 enum: [manufacturer, regulator, endUser]
+ *                 description: 用戶角色（必須與組織類型匹配）
+ *               orgRole:
+ *                 type: string
+ *                 enum: [admin, member]
+ *                 default: member
+ *                 description: 用戶在組織內的職別（可選，預設為 member）
+ *               phone:
+ *                 type: string
+ *                 description: 用戶電話（可選）
+ *     responses:
+ *       201:
+ *         description: 註冊成功並加入組織
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       description: 用戶 ID
+ *                     organizationId:
+ *                       type: string
+ *                       description: 組織 ID
+ *                     role:
+ *                       type: string
+ *                       description: 用戶角色
+ *                     orgRole:
+ *                       type: string
+ *                       description: 用戶在組織內的職別
+ *                     organizationName:
+ *                       type: string
+ *                       description: 組織名稱
+ *                     organizationType:
+ *                       type: string
+ *                       description: 組織類型
+ *                     emailVerificationRequired:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       400:
+ *         description: 請求錯誤
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 error:
+ *                   type: string
+ *                   examples:
+ *                     - "Missing required fields: email, password, firstName, lastName, organizationId, role"
+ *                     - "Email already exists"
+ *                     - "Organization not found"
+ *                     - "Organization is not active"
+ *                     - "Role 'manufacturer' is not valid for organization type 'endUser'"
+ *                     - "Invalid orgRole. Must be either 'admin' or 'member'"
+ *       500:
+ *         description: 伺服器錯誤
+ */
+router.post('/signup-with-organization', signupWithOrganization);
 
 /**
  * @swagger

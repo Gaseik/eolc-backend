@@ -17,22 +17,75 @@ export const getAll = async (req: Request, res: Response) => {
   res.json(users);
 };
 
-// 取得該組織所有成員（僅 admin 可查詢）
+// 取得該組織所有成員（任何已登入用戶可查詢）
+// GET /users/members?page=1&limit=10&search=user&sortBy=firstName&sortOrder=asc
 export const getMembers = async (req: RequestWithUser, res: Response) => {
   try {
-    const userId = req.user?._id;
+    const userId = (req as any).user?.id;
     const user = await User.findById(userId);
-    if (!user || user.orgRole !== 'admin') {
-      return res.status(403).json({ message: '僅 admin 可查詢成員' });
+    if (!user) {
+      return res.status(401).json({ message: '未授權' });
     }
-    const members = await User.find({ organizationId: user.organizationId }, '-passwordHash');
-    res.json(members);
+    
+    // 獲取查詢參數
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string || '';
+    const sortBy = req.query.sortBy as string || 'firstName';
+    const sortOrder = (req.query.sortOrder as string) === 'desc' ? -1 : 1;
+    
+    // 計算跳過的數量
+    const skip = (page - 1) * limit;
+    
+    // 構建查詢條件
+    const query: any = { organizationId: user.organizationId };
+    
+    // 添加搜尋條件
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { role: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    // 執行查詢
+    const members = await User.find(query, '-passwordHash')
+      .populate('organizationId', 'name type')
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(limit);
+    
+    // 獲取總數
+    const total = await User.countDocuments(query);
+    
+    // 計算分頁信息
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+    
+    res.json({
+      success: true,
+      data: members,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limit,
+        hasNextPage,
+        hasPrevPage
+      },
+      count: members.length
+    });
   } catch (err) {
+    console.error('Get members error:', err);
     res.status(500).json({ message: '查詢成員失敗', error: err });
   }
 };
 
-// 獲取所有 regulatory users
+// 獲取所有 regulatory users（支援搜尋、分頁和排序）
+// GET /users/regulatory-users?page=1&limit=10&search=user&sortBy=firstName&sortOrder=asc
 export const getRegulatoryUsers = async (req: RequestWithUser, res: Response) => {
   try {
     const userId = (req as any).user?.id;
@@ -42,10 +95,37 @@ export const getRegulatoryUsers = async (req: RequestWithUser, res: Response) =>
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
 
-    // 獲取所有 regulatory users
-    const regulatoryUsers = await User.find({ 
-      role: 'regulator'
-    }).select('_id firstName lastName email organizationId role');
+    // 獲取查詢參數
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string || '';
+    const sortBy = req.query.sortBy as string || 'firstName';
+    const sortOrder = (req.query.sortOrder as string) === 'desc' ? -1 : 1;
+    
+    // 計算跳過的數量
+    const skip = (page - 1) * limit;
+    
+    // 構建查詢條件
+    const query: any = { role: 'regulator' };
+    
+    // 添加搜尋條件
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // 執行查詢
+    const regulatoryUsers = await User.find(query)
+      .select('_id firstName lastName email organizationId role')
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(limit);
+
+    // 獲取總數
+    const total = await User.countDocuments(query);
 
     // 獲取相關的組織資訊
     const organizationIds = [...new Set(regulatoryUsers.map(user => user.organizationId))];
@@ -69,9 +149,23 @@ export const getRegulatoryUsers = async (req: RequestWithUser, res: Response) =>
       };
     });
 
+    // 計算分頁信息
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
     res.status(200).json({
       success: true,
-      data: usersWithOrg
+      data: usersWithOrg,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limit,
+        hasNextPage,
+        hasPrevPage
+      },
+      count: usersWithOrg.length
     });
   } catch (err) {
     console.error('Get regulatory users error:', err);
