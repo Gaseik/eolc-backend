@@ -254,6 +254,7 @@ export const getProfile = async (req: Request, res: Response) => {
         email: user.email,
         role: user.role,
         organizationId: user.organizationId,
+        orgRole: user.orgRole, // 添加組織角色信息
         profile: {
           firstName: user.firstName,
           lastName: user.lastName,

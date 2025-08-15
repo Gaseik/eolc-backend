@@ -7,6 +7,8 @@ import organizationRoutes from './routes/organizationRoutes';
 import modelRoutes from './routes/ModelRoutes';
 import orderRoutes from './routes/orderRoutes';
 import roleRoutes from './routes/roleRoutes';
+import modelReportRoutes from './routes/modelReportRoutes';
+import orderReportRoutes from './routes/orderReportRoutes';
 import { CorsOptions } from 'cors';
 
 const app = express();
@@ -56,7 +58,8 @@ const corsOptions: CorsOptions = {
     'Access-Control-Allow-Origin',
     'Access-Control-Allow-Credentials',
     'Access-Control-Allow-Headers',
-    'Access-Control-Allow-Methods'
+    'Access-Control-Allow-Methods',
+    'Idempotency-Key'
   ],
   exposedHeaders: [
     'Content-Disposition',
@@ -83,5 +86,7 @@ app.use('/organizations', organizationRoutes);
 app.use('/models', modelRoutes);
 app.use('/orders', orderRoutes);
 app.use('/roles', roleRoutes);
+app.use('/model-reports', modelReportRoutes);
+app.use('/order-reports', orderReportRoutes);
 
 export default app; 

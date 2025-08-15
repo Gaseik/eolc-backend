@@ -6,6 +6,7 @@ import Organization from '../models/Organization';
 // 在檔案最上方加上 Express Request 型別擴充
 import { Request as ExpressRequest } from 'express';
 import mongoose from 'mongoose';
+import { autoCreateModelReport } from './modelReportController';
 
 interface RequestWithUser extends ExpressRequest {
   user?: { _id: any };
@@ -126,6 +127,14 @@ export const createModel = async (req: RequestWithUser, res: Response) => {
     });
 
     await model.save();
+
+    // 自動創建模型報告
+    try {
+      await autoCreateModelReport(model._id?.toString() || '', userId);
+    } catch (reportError) {
+      console.error('Failed to create model report:', reportError);
+      // 不中斷創建流程，只記錄錯誤
+    }
 
     res.status(201).json({
       success: true,
@@ -256,11 +265,17 @@ export const getModelById = async (req: RequestWithUser, res: Response) => {
     if (!model) return res.status(404).json({ success: false, error: 'Model not found' });
 
     // 檢查用戶是否有權限查看此模型
-    // 當 organizationId 被 populate 後，需要使用 _id 來獲取 ObjectId
     const modelOrgId = model.organizationId._id ? model.organizationId._id.toString() : model.organizationId.toString();
     const userOrgId = user.organizationId?.toString();
     
-    if (modelOrgId !== userOrgId) {
+    // 權限檢查邏輯
+    const canView = 
+      user.role === 'regulator' || // regulatory 用戶可以查看所有模型（用於審核）
+      user.role === 'admin' || // admin 可以查看所有模型
+      user.role === 'manufacturer' && modelOrgId === userOrgId || // manufacturer 可以查看自己組織的模型
+      user.role === 'endUser'; // endUser 可以查看所有模型（因為需要查看訂單相關的模型）
+    
+    if (!canView) {
       return res.status(403).json({ success: false, error: 'Access denied' });
     }
 
