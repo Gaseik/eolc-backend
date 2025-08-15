@@ -116,6 +116,7 @@ export const createOrder = async (req: RequestWithUser, res: Response) => {
 };
 
 // 獲取訂單列表
+// GET /orders
 export const getOrders = async (req: RequestWithUser, res: Response) => {
   try {
     const userId = (req as any).user?.id;
@@ -723,5 +724,7 @@ export const testUserAndOrders = async (req: RequestWithUser, res: Response) => 
     res.status(500).json({ success: false, error: 'Server error: ' + (error as Error).message });
   }
 };
+
+
 
  

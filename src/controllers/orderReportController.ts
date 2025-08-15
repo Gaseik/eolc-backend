@@ -212,6 +212,7 @@ export const getOrderReports = async (req: RequestWithUser, res: Response) => {
   try {
     const userId = (req as any).user?.id;
     if (!userId) {
+      
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
