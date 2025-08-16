@@ -5,6 +5,11 @@ export type OrganizationType = 'manufacturer' | 'regulator' | 'endUser';
 export interface IOrganization extends Document {
   name: string;
   type: OrganizationType;
+  address?: string;
+  taxId?: string; // 稅號
+  email?: string; // 組織聯絡郵箱
+  contactPhone?: string; // 組織聯絡電話
+  website?: string; // 組織網站
   members: mongoose.Types.ObjectId[]; // User IDs
   status: 'active' | 'inactive';
   invitations: {
@@ -21,6 +26,11 @@ export interface IOrganization extends Document {
 const OrganizationSchema = new Schema<IOrganization>({
   name: { type: String, required: true },
   type: { type: String, enum: ['manufacturer', 'regulator', 'endUser'], required: true },
+  address: { type: String }, // 地址，非必填
+  taxId: { type: String }, // 稅號，非必填
+  email: { type: String }, // 組織聯絡郵箱，非必填
+  contactPhone: { type: String }, // 組織聯絡電話，非必填
+  website: { type: String }, // 組織網站，非必填
   members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   invitations: [{

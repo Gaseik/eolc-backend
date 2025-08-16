@@ -8,9 +8,16 @@ import moduleAlias from 'module-alias';
 const NODE_ENV = (process.env.NODE_ENV ?? 'dev');
 
 // ✅ Configure "dotenv" FIRST
-const result2 = dotenv.config({
+let result2;
+if (NODE_ENV === 'dev') {
+  result2 = dotenv.config({
+    path: path.resolve(process.cwd(), '.env'),
+  });
+} else {
+  result2 = dotenv.config({
   path: path.resolve(process.cwd(), `.env.${NODE_ENV}`),
 });
+}
 if (result2.error) {
   throw result2.error;
 }

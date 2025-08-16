@@ -6,11 +6,17 @@
     "clean-install": "rm -rf ./node_modules && rm -r package-lock.json && npm i",
     "dev": "NODE_ENV=development node ./dist/server.js",
     "dev:hot": "nodemon --exec \"npm run dev\" --watch ./src --ext .ts",
+    "dev:fast": "NODE_ENV=development nodemon --exec \"ts-node\" ./src/server.ts --watch ./src --ext .ts",
     "lint": "echo 'skipped lint'",
     "start": "NODE_ENV=production node ./dist/server.js",
     "test": "NODE_ENV=test vitest",
     "type-check": "tsc --noEmit",
-    "init": "ts-node scripts/createAdmin.ts"
+    "init": "ts-node scripts/createAdmin.ts",
+    "migrate:users-to-orgs": "ts-node src/scripts/migrate-users-to-organizations.ts",
+    "migrate:org-role": "ts-node src/scripts/migrateOrgRole.ts",
+    "fix:pending-orders": "ts-node src/scripts/fixPendingOrders.ts",
+    "migrate:orders-pending-to-production": "ts-node src/scripts/migratePendingToProduction.ts",
+    "normalize:orders-in_production": "ts-node src/scripts/normalizeInProduction.ts"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -52,6 +58,7 @@
     "@types/module-alias": "^2.0.4",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.12",
+    "@types/nodemailer": "^6.4.17",
     "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",

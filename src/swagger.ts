@@ -12,7 +12,12 @@ const options: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:8080', // 依你的 PORT 調整
+        url: process.env.NODE_ENV === 'production' 
+          ? 'https://api-eolc.muldertech.co.uk' 
+          : 'http://localhost:8080',
+        description: process.env.NODE_ENV === 'production' 
+          ? 'Production Server' 
+          : 'Local Development Server'
       },
     ],
   },
