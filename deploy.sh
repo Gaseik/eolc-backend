@@ -1,23 +1,25 @@
 #!/bin/bash
 
-set -e
+# EOLC Backend 快速部署腳本
+# 使用方法: ./deploy.sh [environment]
 
-echo "==== 1. 拉取最新程式碼 (Pull latest code) ===="
-git pull
+echo "🚀 EOLC Backend 快速部署"
+echo "================================"
 
-echo "==== 2. 安裝缺少的 devDependencies (Install missing devDependencies) ===="
-npm install --save-dev @types/nodemailer
+# 檢查部署腳本是否存在
+if [ ! -f "deploy-docker.sh" ]; then
+    echo "❌ 找不到 deploy-docker.sh 腳本"
+    exit 1
+fi
 
-echo "==== 3. 關閉舊容器 (Stop old containers) ===="
-sudo docker-compose down
+# 設置腳本權限
+chmod +x deploy-docker.sh
 
-echo "==== 4. 重新建構 Docker image (Rebuild Docker images) ===="
-sudo docker-compose build --no-cache
+# 獲取環境參數
+ENVIRONMENT=${1:-production}
 
-echo "==== 5. 背景啟動服務 (Start services in background) ===="
-sudo docker-compose up -d
+echo "📋 部署環境: $ENVIRONMENT"
+echo ""
 
-echo "==== 6. 查看服務狀態 (Show service status) ===="
-sudo docker-compose ps
-
-echo "==== 部署完成！(Deploy finished!) ===="
+# 執行 Docker 部署
+./deploy-docker.sh $ENVIRONMENT
