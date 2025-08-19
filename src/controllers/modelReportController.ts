@@ -8,7 +8,7 @@ interface RequestWithUser extends Request {
   user?: { id: string; email: string; role: string };
 }
 
-// 創建模型報告
+// Create model report
 export const createModelReport = async (req: RequestWithUser, res: Response) => {
   try {
     const { title, description, modelId, assignedTo } = req.body;
@@ -18,7 +18,7 @@ export const createModelReport = async (req: RequestWithUser, res: Response) => 
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    // 驗證必要欄位
+    // Validate required fields
     if (!title || !description || !modelId || !assignedTo) {
       return res.status(400).json({ 
         success: false, 
@@ -26,7 +26,7 @@ export const createModelReport = async (req: RequestWithUser, res: Response) => 
       });
     }
 
-    // 檢查指派的用戶是否存在且是 regulatory 角色
+    // Check if assigned user exists and has regulatory role
     const assignedUser = await User.findById(assignedTo);
     if (!assignedUser) {
       return res.status(400).json({ 
@@ -42,7 +42,7 @@ export const createModelReport = async (req: RequestWithUser, res: Response) => 
       });
     }
 
-    // 檢查模型是否存在
+    // Check if model exists
     const model = await Model.findById(modelId);
     if (!model) {
       return res.status(400).json({ 
@@ -51,7 +51,7 @@ export const createModelReport = async (req: RequestWithUser, res: Response) => 
       });
     }
 
-    // 創建報告
+    // Create report
     const report = await ModelReport.create({
       title,
       description,
@@ -60,7 +60,7 @@ export const createModelReport = async (req: RequestWithUser, res: Response) => 
       createdBy: userId
     });
 
-    // 返回詳細信息
+    // Return detailed information
     const populatedReport = await ModelReport.findById(report._id)
       .populate('assignedTo', 'firstName lastName email role')
       .populate('createdBy', 'firstName lastName email role')
@@ -77,7 +77,7 @@ export const createModelReport = async (req: RequestWithUser, res: Response) => 
   }
 };
 
-// 獲取模型報告列表
+// Get model report list
 // GET /model-reports
 export const getModelReports = async (req: RequestWithUser, res: Response) => {
   try {
@@ -86,7 +86,7 @@ export const getModelReports = async (req: RequestWithUser, res: Response) => {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    // 獲取查詢參數
+    // Get query parameters
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string || '';
@@ -96,21 +96,29 @@ export const getModelReports = async (req: RequestWithUser, res: Response) => {
 
     const skip = (page - 1) * limit;
 
-    // 構建查詢條件
+    // Build query conditions
     const query: any = {};
 
-    // 根據用戶角色篩選
+    // Filter by user role
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
 
     if (user.role === 'regulator') {
-      // Regulatory 用戶可以看到所有報告（用於審核）
-      // 不添加任何篩選條件
+      // Regulatory users can see all reports (for review)
+      // No filtering conditions added
     } else if (user.role === 'manufacturer') {
-      // Manufacturer 用戶只能看到自己創建的報告
-      query.createdBy = userId;
+      // Manufacturer 用戶可以看到組織內的所有報告
+      if (user.organizationId) {
+        // 查找同組織內所有用戶創建的報告
+        const orgUsers = await User.find({ organizationId: user.organizationId }).select('_id');
+        const orgUserIds = orgUsers.map(u => u._id);
+        query.createdBy = { $in: orgUserIds };
+      } else {
+        // 如果沒有組織ID，只能看到自己的報告
+        query.createdBy = userId;
+      }
     }
     // Admin 可以看到所有報告
 

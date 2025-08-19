@@ -10,17 +10,17 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 const JWT_EXPIRES_IN = '15m';
 const REFRESH_EXPIRES_IN = '7d';
 
-// Helper: 產生 JWT
+// Helper: Generate JWT
 function generateToken(user: IUser) {
   return jwt.sign({ id: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
-// Helper: 產生 Refresh Token
+// Helper: Generate Refresh Token
 function generateRefreshToken(user: IUser) {
   return jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: REFRESH_EXPIRES_IN });
 }
 
-// 註冊
+// Register
 // POST /api/auth/signup
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -33,23 +33,23 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Email already exists' });
     }
     const passwordHash = await bcrypt.hash(password, 10);
-    // 產生 email 驗證 token
+    // Generate email verification token
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小時
+    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     let orgId = organizationId;
     let orgRole = null;
-    // 平台 admin 註冊（僅允許 API/Swagger，不建立組織）
+    // Platform admin registration (API/Swagger only, no organization creation)
     if (role === 'admin') {
       orgId = null;
       orgRole = null;
     } else if (!organizationId) {
-      // 一般註冊，沒帶 organizationId，建立新組織，orgRole: 'admin'
-      // 確保 type 是有效的組織類型
+          // General registration, no organizationId provided, create new organization, orgRole: 'admin'
+    // Ensure type is a valid organization type
       const orgType = role === 'admin' ? 'endUser' : role as 'manufacturer' | 'regulator' | 'endUser';
       const org = await Organization.create({
-        name: `${firstName} ${lastName}'s Organization`, // 使用用戶姓名作為初始組織名稱
-        type: orgType,
-        address: undefined, // 新增 address 欄位，設為 undefined
+                  name: `${firstName} ${lastName}'s Organization`, // Use user name as initial organization name
+          type: orgType,
+          address: undefined, // Add address field, set to undefined
         members: [],
         status: 'active',
         invitations: []
@@ -57,7 +57,7 @@ export const signup = async (req: Request, res: Response) => {
       orgId = org._id;
       orgRole = 'admin';
     } else {
-      // 受邀註冊，加入現有組織，orgRole: 'member'
+      // Invited registration, join existing organization, orgRole: 'member'
       orgRole = 'member';
     }
     const user = await User.create({
@@ -69,16 +69,16 @@ export const signup = async (req: Request, res: Response) => {
       role,
       orgRole,
       phone,
-      emailVerified: true, // 暫時設為 true，跳過 email 驗證
+      emailVerified: true, // Temporarily set to true, skip email verification
       emailVerificationToken,
       emailVerificationExpires
     });
-    // 若是自動建立組織，將 user 加入 members
+    // If organization is auto-created, add user to members
     if (orgRole === 'admin' && orgId) {
       await Organization.findByIdAndUpdate(orgId, { $push: { members: user._id } });
     }
-    // 暫時跳過 email 驗證，直接完成註冊
-    // TODO: 未來實作 email 驗證功能
+    // Temporarily skip email verification, complete registration directly
+    // TODO: Implement email verification feature in the future
     return res.status(201).json({
       success: true,
       data: {
@@ -94,13 +94,13 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-// 直接加入指定組織的註冊
+// Direct registration to specified organization
 // POST /api/auth/signup-with-organization
 export const signupWithOrganization = async (req: Request, res: Response) => {
   try {
     const { email, password, firstName, lastName, organizationId, role, orgRole, phone } = req.body;
     
-    // 驗證必要欄位
+    // Validate required fields
     if (!email || !password || !firstName || !lastName || !organizationId || !role) {
       return res.status(400).json({ 
         success: false, 
@@ -108,24 +108,24 @@ export const signupWithOrganization = async (req: Request, res: Response) => {
       });
     }
     
-    // 檢查 email 是否已存在
+    // Check if email already exists
     const exists = await User.findOne({ email });
     if (exists) {
       return res.status(400).json({ success: false, error: 'Email already exists' });
     }
     
-    // 檢查組織是否存在
+    // Check if organization exists
     const organization = await Organization.findById(organizationId);
     if (!organization) {
       return res.status(400).json({ success: false, error: 'Organization not found' });
     }
     
-    // 檢查組織狀態
+    // Check organization status
     if (organization.status !== 'active') {
       return res.status(400).json({ success: false, error: 'Organization is not active' });
     }
     
-    // 檢查角色是否與組織類型匹配
+    // Check if role matches organization type
     const validRoleForOrgType = {
       'manufacturer': ['manufacturer'],
       'regulator': ['regulator'],
@@ -140,7 +140,7 @@ export const signupWithOrganization = async (req: Request, res: Response) => {
       });
     }
     
-    // 驗證 orgRole 參數
+    // Validate orgRole parameter
     const validOrgRoles = ['admin', 'member'];
     const finalOrgRole = orgRole && validOrgRoles.includes(orgRole) ? orgRole : 'member';
     
@@ -148,7 +148,7 @@ export const signupWithOrganization = async (req: Request, res: Response) => {
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
     const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     
-    // 創建用戶
+    // Create user
     const user = await User.create({
       email,
       passwordHash,
@@ -156,14 +156,14 @@ export const signupWithOrganization = async (req: Request, res: Response) => {
       lastName,
       organizationId,
       role,
-      orgRole: finalOrgRole, // 明確設置 orgRole
+              orgRole: finalOrgRole, // Explicitly set orgRole
       phone,
       emailVerified: true,
       emailVerificationToken,
       emailVerificationExpires
     });
     
-    // 將用戶加入組織的 members 列表
+    // Add user to organization的 members 列表
     await Organization.findByIdAndUpdate(organizationId, { 
       $push: { members: user._id } 
     });
@@ -205,16 +205,16 @@ export const login = async (req: Request, res: Response) => {
     if (!valid) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
-    // TODO: 2FA 驗證
+    // TODO: 2FA verification
     const token = generateToken(user);
     const refreshToken = generateRefreshToken(user);
     
-    // 設定 httpOnly cookie
+    // Set httpOnly cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7天
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
     
     return res.status(200).json({
@@ -239,10 +239,10 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-// 取得個人資料
+// Get profile
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    // 假設已經有 auth middleware 解析 userId
+    // Assume auth middleware has parsed userId
     const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ success: false, error: 'Unauthorized' });
     const user = await User.findById(userId);
@@ -254,7 +254,7 @@ export const getProfile = async (req: Request, res: Response) => {
         email: user.email,
         role: user.role,
         organizationId: user.organizationId,
-        orgRole: user.orgRole, // 添加組織角色信息
+        orgRole: user.orgRole, // Add organization role information
         profile: {
           firstName: user.firstName,
           lastName: user.lastName,
@@ -264,7 +264,7 @@ export const getProfile = async (req: Request, res: Response) => {
         settings: {
           twoFactorEnabled: user.twoFactorEnabled,
           notifications: {
-            email: true, sms: false, push: true // TODO: 從 userSettings 取
+            email: true, sms: false, push: true // TODO: Get from userSettings
           }
         },
         createdAt: user.createdAt,
@@ -276,7 +276,7 @@ export const getProfile = async (req: Request, res: Response) => {
   }
 };
 
-// 更新個人資料
+// Update profile
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
@@ -286,7 +286,7 @@ export const updateProfile = async (req: Request, res: Response) => {
     if (firstName !== undefined) update.firstName = firstName;
     if (lastName !== undefined) update.lastName = lastName;
     if (phone !== undefined) update.phone = phone;
-    // 假如有通知設定
+    // If notification settings exist
     if (settings && settings.notifications) {
       update['settings.notifications'] = settings.notifications;
     }
@@ -314,7 +314,7 @@ export const updateProfile = async (req: Request, res: Response) => {
   }
 };
 
-// 修改密碼（需要驗證舊密碼）
+// Change password (requires old password verification)
 export const changePassword = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
@@ -329,13 +329,13 @@ export const changePassword = async (req: Request, res: Response) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
     
-    // 驗證舊密碼
+    // Verify old password
     const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isPasswordValid) {
       return res.status(400).json({ success: false, error: 'Current password is incorrect' });
     }
     
-    // 加密新密碼
+    // Hash new password
     user.passwordHash = await bcrypt.hash(newPassword, 10);
     user.updatedAt = new Date();
     await user.save();
@@ -349,7 +349,7 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-// Email 驗證
+// Email verification
 export const emailVerification = async (req: Request, res: Response) => {
   try {
     const { email, verificationToken } = req.body;
