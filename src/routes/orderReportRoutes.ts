@@ -229,7 +229,7 @@ router.get('/:id', authAndRefresh, getOrderReportById);
  *       401:
  *         description: 未授權
  *       403:
- *         description: 權限不足
+ *         description: 權限不足 - 只有指派的 regulatory 用戶或 admin 可以更新狀態
  *       404:
  *         description: 報告不存在
  *       500:
