@@ -1,253 +1,364 @@
 # EOLC Backend API
 
-End-of-Life Compliance (EOLC) 後端 API 服務
+End-of-Life Compliance (EOLC) Backend API Service
 
-## 🚀 快速開始
+## 🚀 Quick Start
 
-### 1. 克隆專案
+### 1. Clone Project
 ```bash
 git clone <your-repository-url>
 cd eolc-backend
 ```
 
-### 2. 環境設置
+### 2. Environment Setup
 
-#### 方法一：本地開發
+#### Method 1: Local Development
 ```bash
-# 安裝依賴
+# Install dependencies
 npm install
 
-# 創建環境變數文件
+# Create environment variables file
 cp .env.example .env
-# 編輯 .env 文件，設置必要的環境變數
+# Edit .env file with necessary environment variables
 
-# 構建專案
+# Build project
 npm run build
 
-# 啟動開發服務器
+# Start development server
 npm run dev
 ```
 
-#### 方法二：Docker 部署
+#### Method 2: Docker Deployment
 ```bash
-# 創建生產環境變數文件
+# Create production environment variables file
 cp .env.example .env.production
-# 編輯 .env.production 文件
+# Edit .env.production file
 
-# 使用 Docker Compose 啟動
+# Start with Docker Compose
 docker-compose up -d
 
-# 或使用 Docker 直接構建
+# Or build with Docker directly
 docker build -t eolc-backend .
 docker run -p 8080:8080 --env-file .env.production eolc-backend
 ```
 
-## 📋 環境變數配置
+## 📋 Environment Variables Configuration
 
-創建 `.env` 或 `.env.production` 文件：
+Create `.env` or `.env.production` file:
 
 ```env
-# 服務器配置
+# Server Configuration
 NODE_ENV=production
 PORT=8080
 
-# 數據庫配置
+# Database Configuration
 MONGODB_URI=mongodb://localhost:27017/eolc
-# 或使用 MongoDB Atlas
+# Or use MongoDB Atlas
 # MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/eolc
 
-# JWT 配置
+# JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key
 JWT_REFRESH_SECRET=your-super-secret-refresh-key
 
-# CORS 配置（可選）
+# CORS Configuration (Optional)
 CORS_ORIGIN=https://dev-eolc.muldertech.co.uk
 
-# 其他配置
+# Other Configuration
 LOG_LEVEL=info
 ```
 
-## 🐳 Docker 部署
+## 🐳 Docker Deployment
 
-### 本地 Docker 測試
+### Local Docker Testing
 ```bash
-# 構建映像
+# Build image
 docker build -t eolc-backend .
 
-# 運行容器
+# Run container
 docker run -p 8080:8080 --env-file .env.production eolc-backend
 ```
 
-### 生產環境部署
+### Production Environment Deployment
 ```bash
-# 使用 Docker Compose
+# Use Docker Compose
 docker-compose up -d
 
-# 查看日誌
+# View logs
 docker-compose logs -f app
 
-# 停止服務
+# Stop service
 docker-compose down
 ```
 
-## 🧪 API 測試
+## 🧪 API Testing
 
-### 1. 基本連接測試
+### 1. Basic Connection Test
 ```bash
 curl http://localhost:8080/health
 ```
 
-### 2. 用戶登入測試
+### 2. User Login Test
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"enduser@test.com","password":"password123"}'
 ```
 
-### 3. CORS 測試（生產環境）
+### 3. CORS Test (Production Environment)
 ```bash
-# 使用提供的測試腳本
+# Use provided test script
 ./test-production-cors.sh
 ```
 
-## 📊 主要 API 端點
+## 📊 Main API Endpoints
 
-### 認證
-- `POST /auth/login` - 用戶登入
-- `POST /auth/register` - 用戶註冊
-- `GET /auth/check` - 檢查認證狀態
-- `POST /auth/refresh` - 刷新 JWT Token
+### Authentication
+- `POST /auth/login` - User login
+- `POST /auth/register` - User registration
+- `GET /auth/check` - Check authentication status
+- `POST /auth/refresh` - Refresh JWT Token
 
-### 訂單管理
-- `GET /orders` - 獲取訂單列表
-- `POST /orders` - 創建新訂單
-- `GET /orders/:id` - 獲取單一訂單
-- `PUT /orders/:id` - 更新訂單
-- `PATCH /orders/:id/update-quantity` - 更新訂單數量
-- `DELETE /orders/:id` - 刪除訂單
+### Order Management
+- `GET /orders` - Get order list
+- `POST /orders` - Create new order
+- `GET /orders/:id` - Get single order
+- `PUT /orders/:id` - Update order
+- `PATCH /orders/:id/update-quantity` - Update order quantities
+- `DELETE /orders/:id` - Delete order
 
-### 統計數據
-- `GET /statistics/orders` - 獲取訂單統計數據
+### Order Reports (NEW)
+- `GET /order-reports` - Get order reports list
+- `POST /order-reports` - Create new order report
+- `GET /order-reports/:id` - Get single order report
+- `PUT /order-reports/:id` - Update order report
+- `DELETE /order-reports/:id` - Delete order report
+- `PATCH /order-reports/:id/approve` - Approve order report
+- `PATCH /order-reports/:id/reject` - Reject order report
 
-### 組織管理
-- `GET /organizations` - 獲取組織列表
-- `POST /organizations` - 創建組織
-- `GET /organizations/:id` - 獲取組織詳情
+### Model Management
+- `GET /models` - Get model list
+- `POST /models` - Create new model
+- `GET /models/:id` - Get single model
+- `PUT /models/:id` - Update model
+- `DELETE /models/:id` - Delete model
 
-### 用戶管理
-- `GET /users` - 獲取用戶列表
-- `POST /users/invite` - 邀請用戶
-- `PUT /users/:id` - 更新用戶信息
+### Statistics
+- `GET /statistics/orders` - Get order statistics
+- `GET /statistics/reports` - Get report statistics
 
-## 🔧 開發工具
+### Organization Management
+- `GET /organizations` - Get organization list
+- `POST /organizations` - Create organization
+- `GET /organizations/:id` - Get organization details
 
-### 腳本命令
+### User Management
+- `GET /users` - Get user list
+- `POST /users/invite` - Invite user
+- `PUT /users/:id` - Update user information
+
+## 🔧 Development Tools
+
+### Script Commands
 ```bash
-# 開發模式
+# Development mode
 npm run dev
 
-# 構建專案
+# Build project
 npm run build
 
-# 運行測試
+# Run tests
 npm test
 
-# 代碼檢查
+# Code linting
 npm run lint
 
-# 格式化代碼
+# Format code
 npm run format
 ```
 
-### 測試腳本
+### Test Scripts
 ```bash
-# 測試 CORS 配置
+# Test CORS configuration
 ./test-production-cors.sh
 
-# 測試 API 端點
+# Test API endpoints
 node test-simple-api.js
 ```
 
-## 🚀 部署到 AWS
+## 🚀 AWS Deployment
 
-### 1. 準備部署
+### 1. Prepare Deployment
 ```bash
-# 構建專案
+# Build project
 npm run build
 
-# 檢查構建結果
+# Check build results
 ls -la dist/
 ```
 
-### 2. 上傳到 AWS
+### 2. Upload to AWS
 ```bash
-# 使用提供的部署檢查清單
+# Use provided deployment checklist
 cat deploy-checklist.md
 
-# 運行部署腳本
+# Run deployment script
 ./deploy.sh
 ```
 
-### 3. 驗證部署
+### 3. Verify Deployment
 ```bash
-# 測試生產環境 CORS
+# Test production environment CORS
 ./test-production-cors.sh
 
-# 檢查服務狀態
+# Check service status
 curl https://api-eolc.muldertech.co.uk/health
 ```
 
-## 📝 項目結構
+## 📝 Project Structure
 
 ```
 eolc-backend/
 ├── src/
-│   ├── controllers/     # 控制器邏輯
-│   ├── models/         # 數據模型
-│   ├── routes/         # 路由定義
-│   ├── middleware/     # 中間件
-│   ├── utils/          # 工具函數
-│   └── app.ts          # 應用程序入口
-├── dist/               # 編譯後的文件
-├── tests/              # 測試文件
-├── Dockerfile          # Docker 配置
-├── docker-compose.yml  # Docker Compose 配置
-├── package.json        # 項目依賴
-└── README.md           # 項目文檔
+│   ├── controllers/     # Controller logic
+│   │   ├── authController.ts
+│   │   ├── orderController.ts
+│   │   ├── orderReportController.ts
+│   │   ├── modelController.ts
+│   │   ├── organizationController.ts
+│   │   ├── userController.ts
+│   │   └── statisticsController.ts
+│   ├── models/         # Data models
+│   │   ├── User.ts
+│   │   ├── Organization.ts
+│   │   ├── Model.ts
+│   │   ├── Order.ts
+│   │   └── OrderReport.ts
+│   ├── routes/         # Route definitions
+│   │   ├── authRoutes.ts
+│   │   ├── orderRoutes.ts
+│   │   ├── orderReportRoutes.ts
+│   │   ├── modelRoutes.ts
+│   │   ├── organizationRoutes.ts
+│   │   ├── userRoutes.ts
+│   │   └── statisticsRoutes.ts
+│   ├── middleware/     # Middleware
+│   │   ├── auth.ts
+│   │   └── cors.ts
+│   ├── utils/          # Utility functions
+│   └── app.ts          # Application entry point
+├── dist/               # Compiled files
+├── tests/              # Test files
+├── Dockerfile          # Docker configuration
+├── docker-compose.yml  # Docker Compose configuration
+├── package.json        # Project dependencies
+└── README.md           # Project documentation
 ```
 
-## 🔍 故障排除
+## 🔍 Current Progress & Features
 
-### 常見問題
+### ✅ Completed Features
 
-1. **CORS 錯誤**
-   - 檢查 `.env` 中的 CORS 配置
-   - 確認前端域名在允許列表中
+1. **Authentication System**
+   - JWT-based authentication with automatic token refresh
+   - Role-based access control (admin, manufacturer, regulator, endUser)
+   - Secure password hashing and validation
 
-2. **數據庫連接錯誤**
-   - 檢查 `MONGODB_URI` 配置
-   - 確認數據庫服務正在運行
+2. **Order Management**
+   - Complete CRUD operations for orders
+   - Automatic status transitions based on quantity changes
+   - Quantity validation (producedQuantity = inUseQuantity + disposedQuantity + unusedQuantity)
+   - Real-time status updates
 
-3. **JWT 錯誤**
-   - 檢查 `JWT_SECRET` 配置
-   - 確認 Token 格式正確
+3. **Order Reports System (NEW)**
+   - Comprehensive disposal reporting functionality
+   - Approval workflow for reports
+   - Status tracking (pending, approved, rejected)
+   - Integration with order quantities
 
-### 日誌查看
+4. **Model Management**
+   - Product model CRUD operations
+   - Model categorization and organization association
+
+5. **Organization Management**
+   - Multi-tenant organization support
+   - User-organization relationships
+
+6. **Statistics & Analytics**
+   - Order statistics and reporting
+   - Data aggregation and analysis
+
+7. **Deployment Infrastructure**
+   - Docker containerization
+   - AWS EC2 deployment with shell scripts
+   - Automated deployment pipeline
+   - Health checks and monitoring
+
+### 🔄 In Progress
+
+1. **Enhanced Reporting**
+   - Advanced analytics dashboard
+   - Export functionality for reports
+   - Real-time notifications
+
+2. **API Documentation**
+   - Swagger/OpenAPI documentation
+   - Interactive API testing interface
+
+3. **Performance Optimization**
+   - Database query optimization
+   - Caching implementation
+   - Rate limiting
+
+### 📋 Technical Architecture
+
+**Backend Stack:**
+- **Runtime**: Node.js with TypeScript
+- **Framework**: Express.js
+- **Database**: MongoDB Atlas with Mongoose ODM
+- **Authentication**: JWT with refresh tokens
+- **Validation**: Mongoose schema validation with custom business rules
+- **CORS**: Multi-origin support for development and production
+
+**Deployment:**
+- **Containerization**: Docker with multi-stage builds
+- **Cloud Platform**: AWS EC2
+- **Deployment**: Custom shell scripts for automated deployment
+- **DNS**: GoDaddy domain management
+- **Monitoring**: Health checks and logging
+
+**Security Features:**
+- Role-based access control (RBAC)
+- JWT token management
+- Input validation and sanitization
+- CORS configuration
+- Secure password handling
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+1. **CORS Errors**
+   - Check CORS configuration in `.env`
+   - Verify frontend domain is in allowed list
+
+2. **Database Connection Errors**
+   - Check `MONGODB_URI` configuration
+   - Ensure database service is running
+
+3. **JWT Errors**
+   - Check `JWT_SECRET` configuration
+   - Verify token format is correct
+
+4. **Order Quantity Validation Errors**
+   - Ensure producedQuantity equals sum of other quantities
+   - Check for negative quantity values
+
+### Log Viewing
 ```bash
-# Docker 日誌
+# Docker logs
 docker-compose logs -f app
 
-# 本地開發日誌
+# Local development logs
 npm run dev
 ```
 
-## 📞 支持
-
-如有問題，請檢查：
-1. 部署檢查清單：`deploy-checklist.md`
-2. 測試腳本：`test-production-cors.sh`
-3. 項目文檔：`README.md`
-
-## 📄 許可證
-
-[你的許可證信息] 
