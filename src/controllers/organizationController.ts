@@ -14,7 +14,7 @@ interface RequestWithUser extends ExpressRequest {
  * @swagger
  * tags:
  *   name: Organizations
- *   description: 組織管理 API
+ *   description: Organization Management API
  */
 
 export const getOrganizations = async (req: Request, res: Response) => {
@@ -183,7 +183,7 @@ export const deleteOrganization = async (req: Request, res: Response) => {
  * @swagger
  * /organizations/{id}/invite:
  *   post:
- *     summary: 邀請成員加入組織
+ *     summary: Invite Member to Organization
  *     tags: [Organizations]
  *     parameters:
  *       - in: path
@@ -191,7 +191,7 @@ export const deleteOrganization = async (req: Request, res: Response) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: 組織 ID
+ *         description: Organization ID
  *     requestBody:
  *       required: true
  *       content:
@@ -203,9 +203,9 @@ export const deleteOrganization = async (req: Request, res: Response) => {
  *                 type: string
  *     responses:
  *       200:
- *         description: 邀請已送出
+ *         description: Invitation sent
  *       404:
- *         description: 找不到組織
+ *         description: Organization not found
  */
 export const inviteMember = async (req: RequestWithUser, res: Response) => {
   try {
@@ -234,7 +234,7 @@ export const inviteMember = async (req: RequestWithUser, res: Response) => {
  * @swagger
  * /organizations/{id}/invitations:
  *   get:
- *     summary: 查詢組織邀請列表
+ *     summary: Query Organization Invitations List
  *     tags: [Organizations]
  *     parameters:
  *       - in: path
@@ -242,12 +242,12 @@ export const inviteMember = async (req: RequestWithUser, res: Response) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: 組織 ID
+ *         description: Organization ID
  *     responses:
  *       200:
- *         description: 邀請列表
+ *         description: Invitations list
  *       404:
- *         description: 找不到組織
+ *         description: Organization not found
  */
 export const getInvitations = async (req: Request, res: Response) => {
   try {

@@ -8,7 +8,7 @@ const router = Router();
  * @swagger
  * /orders:
  *   post:
- *     summary: 創建訂單
+ *     summary: Create Order
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
@@ -26,26 +26,26 @@ const router = Router();
  *             properties:
  *               modelId:
  *                 type: string
- *                 description: 模型 ID
+ *                 description: Model ID
  *               batchNumber:
  *                 type: string
- *                 description: 批次號
+ *                 description: Batch number
  *               endUserCompanyId:
  *                 type: string
- *                 description: 終端用戶公司 ID (Organization)
+ *                 description: End user company ID (Organization)
  *               producedQuantity:
  *                 type: number
- *                 description: 生產數量
+ *                 description: Production quantity
 
  *     responses:
  *       201:
- *         description: 訂單創建成功
+ *         description: Order created successfully
  *       400:
- *         description: 請求參數錯誤
+ *         description: Invalid request parameters
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  *       403:
- *         description: 權限不足
+ *         description: Insufficient permissions
  */
 router.post('/', authAndRefresh, orderController.createOrder);
 
@@ -53,7 +53,7 @@ router.post('/', authAndRefresh, orderController.createOrder);
  * @swagger
  * /orders:
  *   get:
- *     summary: 獲取訂單列表
+ *     summary: Get Orders List
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
@@ -63,38 +63,38 @@ router.post('/', authAndRefresh, orderController.createOrder);
  *         schema:
  *           type: integer
  *           default: 1
- *         description: 頁碼
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: 每頁數量
+ *         description: Items per page
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
- *         description: 搜尋關鍵字 (批次號、終端用戶公司)
+ *         description: Search keywords (batch number, end user company)
  *       - in: query
  *         name: status
  *         schema:
  *           type: string
  *           enum: [pending, production, in-used, disposed]
- *         description: 訂單狀態篩選
+ *         description: Order status filter
  *       - in: query
  *         name: scope
  *         schema:
  *           type: string
  *           enum: [my, organization]
  *           default: my
- *         description: "查詢範圍 (my: 自己的訂單, organization: 組織內所有訂單)"
+ *         description: "Query scope (my: own orders, organization: all orders in organization)"
  *     responses:
  *       200:
- *         description: 成功獲取訂單列表
+ *         description: Successfully retrieved orders list
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  *       403:
- *         description: 權限不足
+ *         description: Insufficient permissions
  */
 router.get('/', authAndRefresh, orderController.getOrders);
 

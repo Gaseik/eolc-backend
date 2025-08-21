@@ -8,13 +8,13 @@ const router = Router();
  * @swagger
  * /models/approvers:
  *   get:
- *     summary: 獲取可用的審核者列表
+ *     summary: Get Available Approvers List
  *     tags: [Models]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 成功獲取審核者列表
+ *         description: Successfully retrieved approvers list
  *         content:
  *           application/json:
  *             schema:
@@ -29,20 +29,20 @@ const router = Router();
  *                     properties:
  *                       id:
  *                         type: string
- *                         description: 用戶 ID
+ *                         description: User ID
  *                       name:
  *                         type: string
- *                         description: 用戶姓名
+ *                         description: User name
  *                       email:
  *                         type: string
- *                         description: 用戶郵箱
+ *                         description: User email
  *                       role:
  *                         type: string
- *                         description: 用戶角色
+ *                         description: User role
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  *       400:
- *         description: 用戶不屬於任何組織
+ *         description: User does not belong to any organization
  */
 router.get('/approvers', authAndRefresh, modelController.getAvailableApprovers);
 
@@ -52,7 +52,7 @@ router.get('/approvers', authAndRefresh, modelController.getAvailableApprovers);
  * @swagger
  * /models:
  *   post:
- *     summary: 創建設備模型
+ *     summary: Create Device Model
  *     tags: [Models]
  *     security:
  *       - bearerAuth: []
@@ -72,40 +72,40 @@ router.get('/approvers', authAndRefresh, modelController.getAvailableApprovers);
  *             properties:
  *               modelName:
  *                 type: string
- *                 description: 模型名稱
+ *                 description: Model name
  *               modelNumber:
  *                 type: string
- *                 description: 模型編號
+ *                 description: Model number
  *               description:
  *                 type: string
- *                 description: 模型描述
+ *                 description: Model description
  *               quantity:
  *                 type: number
- *                 description: 數量
+ *                 description: Quantity
  *               manufactureDate:
  *                 type: string
  *                 format: date
- *                 description: 製造日期 (YYYY-MM-DD)
+ *                 description: Manufacture date (YYYY-MM-DD)
  *               expirationDate:
  *                 type: string
  *                 format: date
- *                 description: 過期日期 (YYYY-MM-DD)
+ *                 description: Expiration date (YYYY-MM-DD)
  *               standards:
  *                 type: array
  *                 items:
  *                   type: string
- *                 description: 相關標準
+ *                 description: Related standards
  *               classes:
  *                 type: array
  *                 items:
  *                   type: string
- *                 description: 分類
+ *                 description: Categories
  *               intendedUseCategories:
  *                 type: string
- *                 description: 預期用途類別
+ *                 description: Intended use categories
  *               intendedUse:
  *                 type: string
- *                 description: 預期用途描述
+ *                 description: Intended use description
  *               materialComposition:
  *                 type: object
  *                 properties:
@@ -132,7 +132,7 @@ router.get('/approvers', authAndRefresh, modelController.getAvailableApprovers);
  *                     type: string
  *               disclaimer:
  *                 type: string
- *                 description: 免責聲明
+ *                 description: Disclaimer
  *               approvers:
  *                 type: array
  *                 items:
@@ -143,19 +143,19 @@ router.get('/approvers', authAndRefresh, modelController.getAvailableApprovers);
  *                   properties:
  *                     id:
  *                       type: string
- *                       description: 審核者 ID
+ *                       description: Approver ID
  *                     permission:
  *                       type: string
  *                       enum: [Full Access, Can Edit, Read Only]
- *                       description: 權限級別
+ *                       description: Permission level
  *               status:
  *                 type: string
  *                 enum: [draft, published]
  *                 default: draft
- *                 description: 模型狀態
+ *                 description: Model status
  *     responses:
  *       201:
- *         description: 模型創建成功
+ *         description: Model created successfully
  *         content:
  *           application/json:
  *             schema:
@@ -174,13 +174,13 @@ router.get('/approvers', authAndRefresh, modelController.getAvailableApprovers);
  *                       type: string
  *                     batchNumber:
  *                       type: string
- *                       description: 自動產生的批次號
+ *                       description: Auto-generated batch number
  *       400:
- *         description: 請求參數錯誤
+ *         description: Invalid request parameters
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  *       403:
- *         description: 權限不足
+ *         description: Insufficient permissions
  */
 router.post('/', authAndRefresh, modelController.createModel);
 
@@ -188,7 +188,7 @@ router.post('/', authAndRefresh, modelController.createModel);
  * @swagger
  * /models:
  *   get:
- *     summary: 獲取所有模型（分頁）
+ *     summary: Get All Models (Paginated)
  *     tags: [Models]
  *     security:
  *       - bearerAuth: []
@@ -247,7 +247,7 @@ router.get('/', authAndRefresh, modelController.getModels);
  *       403:
  *         description: 權限不足
  *       404:
- *         description: 模型不存在
+ *         description: Model not found
  */
 router.get('/:id', authAndRefresh, modelController.getModelById);
 

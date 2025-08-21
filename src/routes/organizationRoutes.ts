@@ -8,27 +8,27 @@ const router = Router();
  * @swagger
  * /organizations:
  *   get:
- *     summary: 取得組織列表
+ *     summary: Get Organizations List
  *     tags: [Organizations]
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *         description: 頁碼
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *         description: 每頁筆數
+ *         description: Items per page
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
- *         description: 搜尋關鍵字
+ *         description: Search keywords
  *     responses:
  *       200:
- *         description: 組織列表
+ *         description: Organizations list
  */
 router.get('/', authAndRefresh, organizationController.getOrganizations);
 
@@ -36,7 +36,7 @@ router.get('/', authAndRefresh, organizationController.getOrganizations);
  * @swagger
  * /organizations/{id}:
  *   get:
- *     summary: 取得單一組織
+ *     summary: Get Single Organization
  *     tags: [Organizations]
  *     security:
  *       - bearerAuth: []
@@ -46,28 +46,28 @@ router.get('/', authAndRefresh, organizationController.getOrganizations);
  *         required: true
  *         schema:
  *           type: string
- *         description: 組織 ID
+ *         description: Organization ID
  *     responses:
  *       200:
- *         description: 組織資料
+ *         description: Organization data
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  *       404:
- *         description: 找不到組織
+ *         description: Organization not found
  */
 /**
  * @swagger
  * /organizations/end-users:
  *   get:
- *     summary: 獲取所有終端用戶公司
+ *     summary: Get All End User Companies
  *     tags: [Organizations]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 成功獲取公司列表
+ *         description: Successfully retrieved companies list
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  */
 router.get('/end-users', authAndRefresh, organizationController.getAllEndUserCompanies);
 
@@ -75,17 +75,17 @@ router.get('/end-users', authAndRefresh, organizationController.getAllEndUserCom
  * @swagger
  * /organizations/my:
  *   get:
- *     summary: 取得當前用戶的組織資訊
+ *     summary: Get Current User's Organization Information
  *     tags: [Organizations]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 組織資料
+ *         description: Organization data
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  *       404:
- *         description: 找不到組織或用戶不屬於任何組織
+ *         description: Organization not found or user does not belong to any organization
  */
 router.get('/my', authAndRefresh, organizationController.getMyOrganization);
 

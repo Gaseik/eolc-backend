@@ -9,11 +9,11 @@
  * @swagger
  * /users/getAllUsers:
  *   get:
- *     summary: 取得所有使用者（不含密碼）
+ *     summary: Get All Users (without passwords)
  *     tags: [Users]
  *     responses:
  *       200:
- *         description: 成功取得所有使用者
+ *         description: Successfully retrieved all users
  */
 import { Router } from 'express';
 import { getAll, getMembers, inviteUser, getRegulatoryUsers } from '../controllers/userController';
@@ -27,7 +27,7 @@ router.get('/getAllUsers', authAndRefresh, getAll);
  * @swagger
  * /users/members:
  *   get:
- *     summary: 取得該組織所有成員（任何已登入用戶可查詢）
+ *     summary: Get All Organization Members (any logged-in user can query)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -37,35 +37,35 @@ router.get('/getAllUsers', authAndRefresh, getAll);
  *         schema:
  *           type: integer
  *           default: 1
- *         description: 頁碼
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *           default: 10
- *         description: 每頁項目數量
+ *         description: Items per page
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
- *         description: 搜尋關鍵字（姓名、郵箱、角色）
+ *         description: Search keywords (name, email, role)
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
  *           enum: [firstName, lastName, email, role, createdAt]
  *           default: firstName
- *         description: 排序欄位
+ *         description: Sort field
  *       - in: query
  *         name: sortOrder
  *         schema:
  *           type: string
  *           enum: [asc, desc]
  *           default: asc
- *         description: 排序方向
+ *         description: Sort order
  *     responses:
  *       200:
- *         description: 成員列表
+ *         description: Members list
  *         content:
  *           application/json:
  *             schema:
@@ -163,7 +163,7 @@ router.get('/members', authAndRefresh, getMembers);
  *         description: 排序方向
  *     responses:
  *       200:
- *         description: 成功獲取 regulatory users 列表
+ *         description: Successfully retrieved regulatory users list
  *         content:
  *           application/json:
  *             schema:
@@ -178,28 +178,28 @@ router.get('/members', authAndRefresh, getMembers);
  *                     properties:
  *                       id:
  *                         type: string
- *                         description: 用戶 ID
+ *                         description: User ID
  *                       name:
  *                         type: string
- *                         description: 用戶姓名
+ *                         description: User name
  *                       email:
  *                         type: string
- *                         description: 用戶郵箱
+ *                         description: User email
  *                       role:
  *                         type: string
- *                         description: 用戶角色
+ *                         description: User role
  *                       organization:
  *                         type: object
  *                         properties:
  *                           id:
  *                             type: string
- *                             description: 組織 ID
+ *                             description: Organization ID
  *                           name:
  *                             type: string
- *                             description: 組織名稱
+ *                             description: Organization name
  *                           type:
  *                             type: string
- *                             description: 組織類型
+ *                             description: Organization type
  *                 pagination:
  *                   type: object
  *                   properties:
@@ -218,9 +218,9 @@ router.get('/members', authAndRefresh, getMembers);
  *                 count:
  *                   type: integer
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  *       500:
- *         description: 伺服器錯誤
+ *         description: Server error
  */
 router.get('/regulatory-users', authAndRefresh, getRegulatoryUsers);
 
@@ -228,7 +228,7 @@ router.get('/regulatory-users', authAndRefresh, getRegulatoryUsers);
  * @swagger
  * /users/invite:
  *   post:
- *     summary: 邀請用戶加入組織（預設為非 admin）
+ *     summary: Invite User to Organization (default as non-admin)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -246,11 +246,11 @@ router.get('/regulatory-users', authAndRefresh, getRegulatoryUsers);
  *                 enum: [regulatory, manufacturer, end user]
  *     responses:
  *       200:
- *         description: 邀請已送出
+ *         description: Invitation sent
  *       400:
- *         description: 該 email 已存在
+ *         description: Email already exists
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  */
 router.post('/invite', authAndRefresh, inviteUser);
 

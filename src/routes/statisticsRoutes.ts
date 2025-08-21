@@ -8,13 +8,13 @@ const router = express.Router();
  * @swagger
  * /statistics/orders:
  *   get:
- *     summary: 獲取訂單統計數據（包括與上個月的比較）
+ *     summary: Get Order Statistics (including comparison with previous month)
  *     tags: [Statistics]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 成功獲取統計數據
+ *         description: Successfully retrieved statistics
  *         content:
  *           application/json:
  *             schema:

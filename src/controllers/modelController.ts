@@ -16,7 +16,7 @@ interface RequestWithUser extends ExpressRequest {
  * @swagger
  * tags:
  *   name: Models
- *   description: 設備模型管理 API
+ *   description: Device Model Management API
  */
 
 // 創建設備模型

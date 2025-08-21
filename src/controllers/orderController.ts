@@ -15,7 +15,7 @@ interface RequestWithUser extends ExpressRequest {
  * @swagger
  * tags:
  *   name: Orders
- *   description: 訂單管理 API
+ *   description: Order Management API
  */
 
 // 創建訂單

@@ -9,7 +9,7 @@ const router = Router();
  * @swagger
  * /auth/signup:
  *   post:
- *     summary: 用戶註冊
+ *     summary: User Registration
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -35,9 +35,9 @@ const router = Router();
  *                 type: string
  *     responses:
  *       201:
- *         description: 註冊成功
+ *         description: Registration successful
  *       400:
- *         description: Email 已存在
+ *         description: Email already exists
  */
 router.post('/signup', signup);
 
@@ -45,8 +45,8 @@ router.post('/signup', signup);
  * @swagger
  * /auth/signup-with-organization:
  *   post:
- *     summary: 直接加入指定組織的用戶註冊
- *     description: 此 API 允許用戶直接註冊並加入指定的組織，無需系統自動創建新組織。支援指定用戶在組織內的職別（orgRole）。
+ *     summary: Direct Organization Registration
+ *     description: This API allows users to register and join a specified organization directly without the system automatically creating a new organization. Supports specifying the user's role within the organization (orgRole).
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -64,34 +64,34 @@ router.post('/signup', signup);
  *             properties:
  *               email:
  *                 type: string
- *                 description: 用戶郵箱
+ *                 description: User email
  *               password:
  *                 type: string
- *                 description: 用戶密碼
+ *                 description: User password
  *               firstName:
  *                 type: string
- *                 description: 用戶名字
+ *                 description: User first name
  *               lastName:
  *                 type: string
- *                 description: 用戶姓氏
+ *                 description: User last name
  *               organizationId:
  *                 type: string
- *                 description: 要加入的組織 ID（必填）
+ *                 description: Organization ID to join (required)
  *               role:
  *                 type: string
  *                 enum: [manufacturer, regulator, endUser]
- *                 description: 用戶角色（必須與組織類型匹配）
+ *                 description: User role (must match organization type)
  *               orgRole:
  *                 type: string
  *                 enum: [admin, member]
  *                 default: member
- *                 description: 用戶在組織內的職別（可選，預設為 member）
+ *                 description: User's role within the organization (optional, defaults to member)
  *               phone:
  *                 type: string
- *                 description: 用戶電話（可選）
+ *                 description: User phone number (optional)
  *     responses:
  *       201:
- *         description: 註冊成功並加入組織
+ *         description: Registration successful and joined organization
  *         content:
  *           application/json:
  *             schema:
@@ -143,7 +143,7 @@ router.post('/signup', signup);
  *                     - "Role 'manufacturer' is not valid for organization type 'endUser'"
  *                     - "Invalid orgRole. Must be either 'admin' or 'member'"
  *       500:
- *         description: 伺服器錯誤
+ *         description: Server error
  */
 router.post('/signup-with-organization', signupWithOrganization);
 
@@ -151,7 +151,7 @@ router.post('/signup-with-organization', signupWithOrganization);
  * @swagger
  * /auth/login:
  *   post:
- *     summary: 用戶登入
+ *     summary: User Login
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -166,9 +166,9 @@ router.post('/signup-with-organization', signupWithOrganization);
  *                 type: string
  *     responses:
  *       200:
- *         description: 登入成功
+ *         description: Login successful
  *       401:
- *         description: 帳號或密碼錯誤
+ *         description: Invalid email or password
  */
 router.post('/login', login);
 
@@ -176,17 +176,17 @@ router.post('/login', login);
  * @swagger
  * /auth/profile:
  *   get:
- *     summary: 取得用戶個人資料
+ *     summary: Get User Profile
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 成功取得個人資料
+ *         description: Successfully retrieved profile
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  *   put:
- *     summary: 更新用戶個人資料
+ *     summary: Update User Profile
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
@@ -219,11 +219,11 @@ router.post('/login', login);
  *                         type: boolean
  *     responses:
  *       200:
- *         description: 更新成功
+ *         description: Update successful
  *       400:
- *         description: 輸入資料錯誤
+ *         description: Invalid input data
  *       401:
- *         description: 未授權
+ *         description: Unauthorized
  */
 router.get('/check', authAndRefresh, checkAuth);
 router.get('/profile', authAndRefresh, getProfile);
@@ -279,9 +279,9 @@ router.put('/change-password', authAndRefresh, changePassword);
  *                 type: string
  *     responses:
  *       200:
- *         description: 驗證成功
+ *         description: Verification successful
  *       400:
- *         description: 驗證失敗
+ *         description: Verification failed
  */
 router.post('/email-verification', emailVerification);
 
@@ -289,13 +289,13 @@ router.post('/email-verification', emailVerification);
  * @swagger
  * /auth/logout:
  *   post:
- *     summary: 用戶登出
+ *     summary: User Logout
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: 登出成功
+ *         description: Logout successful
  */
 router.post('/logout', logout);
 
@@ -303,7 +303,7 @@ router.post('/logout', logout);
  * @swagger
  * /auth/refresh:
  *   post:
- *     summary: 刷新 access token
+ *     summary: Refresh Access Token
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -316,9 +316,9 @@ router.post('/logout', logout);
  *                 type: string
  *     responses:
  *       200:
- *         description: 成功刷新 token
+ *         description: Token refreshed successfully
  *       401:
- *         description: refresh token 無效
+ *         description: Invalid refresh token
  */
 router.post('/refresh', refreshToken);
 
@@ -326,7 +326,7 @@ router.post('/refresh', refreshToken);
  * @swagger
  * /auth/forgot-password:
  *   post:
- *     summary: 忘記密碼（寄送重設連結）
+ *     summary: Forgot Password (Send Reset Link)
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -339,7 +339,7 @@ router.post('/refresh', refreshToken);
  *                 type: string
  *     responses:
  *       200:
- *         description: 如果 email 存在，會寄送重設連結
+ *         description: If email exists, reset link will be sent
  */
 router.post('/forgot-password', forgotPassword);
 
@@ -347,7 +347,7 @@ router.post('/forgot-password', forgotPassword);
  * @swagger
  * /auth/reset-password:
  *   post:
- *     summary: 重設密碼
+ *     summary: Reset Password
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -364,9 +364,9 @@ router.post('/forgot-password', forgotPassword);
  *                 type: string
  *     responses:
  *       200:
- *         description: 密碼重設成功
+ *         description: Password reset successful
  *       400:
- *         description: token 錯誤或過期
+ *         description: Invalid or expired token
  */
 router.post('/reset-password', resetPassword);
 
@@ -374,7 +374,7 @@ router.post('/reset-password', resetPassword);
  * @swagger
  * /auth/invite-info:
  *   get:
- *     summary: 取得邀請資訊（註冊頁用）
+ *     summary: Get Invitation Information (for registration page)
  *     tags: [Auth]
  *     parameters:
  *       - in: query
@@ -382,12 +382,12 @@ router.post('/reset-password', resetPassword);
  *         required: true
  *         schema:
  *           type: string
- *         description: 邀請 token
+ *         description: Invitation token
  *     responses:
  *       200:
- *         description: 邀請資訊
+ *         description: Invitation information
  *       400:
- *         description: token 無效
+ *         description: Invalid token
  */
 router.get('/invite-info', getInviteInfo);
 
@@ -395,7 +395,7 @@ router.get('/invite-info', getInviteInfo);
  * @swagger
  * /auth/activate-invite:
  *   post:
- *     summary: 啟用邀請註冊
+ *     summary: Activate Invitation Registration
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -414,9 +414,9 @@ router.get('/invite-info', getInviteInfo);
  *                 type: string
  *     responses:
  *       200:
- *         description: 註冊成功
+ *         description: Registration successful
  *       400:
- *         description: token 無效或缺少參數
+ *         description: Invalid token or missing parameters
  */
 router.post('/activate-invite', activateInvite);
 

@@ -5,18 +5,18 @@ import { UserRole } from '../models/User';
  * @swagger
  * tags:
  *   name: Roles
- *   description: 角色管理 API
+ *   description: Role Management API
  */
 
 /**
  * @swagger
  * /roles:
  *   get:
- *     summary: 取得所有可用角色（不包含 admin）
+ *     summary: Get All Available Roles (excluding admin)
  *     tags: [Roles]
  *     responses:
  *       200:
- *         description: 成功取得角色列表
+ *         description: Successfully retrieved roles list
  *         content:
  *           application/json:
  *             schema:
@@ -73,11 +73,11 @@ export const getRoles = async (req: Request, res: Response) => {
  * @swagger
  * /roles/with-admin:
  *   get:
- *     summary: 取得所有角色（包含 admin）
+ *     summary: Get All Roles (including admin)
  *     tags: [Roles]
  *     responses:
  *       200:
- *         description: 成功取得角色列表
+ *         description: Successfully retrieved roles list
  */
 export const getAllRoles = async (req: Request, res: Response) => {
   try {
